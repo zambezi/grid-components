@@ -9,6 +9,7 @@ export default {
 , moduleName: 'gridComponents'
 , external: [
     '@zambezi/d3-utils'
+  , '@zambezi/grid'
   , 'd3-dispatch'
   , 'd3-selection'
   ]
@@ -24,6 +25,7 @@ export default {
   ]
 , globals: {
     '@zambezi/d3-utils': 'd3Utils'
+  , '@zambezi/grid': 'grid'
   , 'd3-dispatch': 'd3'
   , 'd3-selection': 'd3'
   }
