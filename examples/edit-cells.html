@@ -25,10 +25,13 @@
             , { key: 'email', sortDescending: true }
             , { key: 'phone' }
             , {
-                key: 'username' 
-              , components: [ gridComponents.createEditCell() ]
+                key: 'username'
+              , components: [
+                  gridComponents.createEditCell()
+                , grid.updateTextIfChanged
+                ]
               }
-            , { 
+            , {
                 label: 'address'
               , children: [
                   { label: 'city', key: 'address.city', width: 300 }
