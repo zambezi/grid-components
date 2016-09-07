@@ -1,1 +1,1 @@
-export function ok() { return 'ko' }
+export { createEditCell } from './edit-cell'
