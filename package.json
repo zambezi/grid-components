@@ -1,40 +1,45 @@
 {
-  "name": "@zambezi/grid-components"
-, "version": "0.0.1"
-, "description": "Components for the Zambezi Grids"
-, "keywords": [ "d3", "grid", "zambezi" ]
-, "scripts": {
-    "build": "mkdirp dist && rollup -c"
-  , "clean": "rimraf dist"
-  , "watch": "rollup -c -w"
-  , "test": "mocha"
-  , "pretest": "npm run clean && npm run build"
-  , "prepublish": "npm test"
-  }
-, "license": "MIT"
-, "main": "dist/grid-components.js"
-, "homepage": "https://github.com/zambezi/grid-components"
-, "repository": {
-    "type": "git"
-  , "url": "https://github.com/zambezi/grid-components.git"
-  }
-, "devDependencies": {
-    "babel-preset-es2015": "6.9.0"
-  , "babel-preset-es2015-rollup": "1.1.1"
-  , "babel-register": "6.9.0"
-  , "babelrc-rollup": "2.0.0"
-  , "faker": "1.0.0"
-  , "mkdirp": "0.5.1"
-  , "mocha": "2.5.3"
-  , "normalize.css": "4.2.0"
-  , "rimraf": "2.5.3"
-  , "rollup": "0.26.3"
-  , "rollup-plugin-babel": "2.3.9"
-  , "rollup-plugin-postcss": "0.1.1"
-  }
-, "dependencies": {
-    "@zambezi/d3-utils": "^3.0.0"
-  , "d3-dispatch": "^1.0.1"
-  , "d3-selection": "^1.0.0"
+  "name": "@zambezi/grid-components",
+  "version": "0.0.1",
+  "description": "Components for the Zambezi Grids",
+  "keywords": [
+    "d3",
+    "grid",
+    "zambezi"
+  ],
+  "scripts": {
+    "build": "mkdirp dist && rollup -c",
+    "clean": "rimraf dist",
+    "watch": "rollup -c -w",
+    "test": "mocha",
+    "pretest": "npm run clean && npm run build",
+    "prepublish": "npm test"
+  },
+  "license": "MIT",
+  "main": "dist/grid-components.js",
+  "homepage": "https://github.com/zambezi/grid-components",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zambezi/grid-components.git"
+  },
+  "devDependencies": {
+    "@zambezi/grid": "^0.3.0",
+    "babel-preset-es2015": "6.9.0",
+    "babel-preset-es2015-rollup": "1.1.1",
+    "babel-register": "6.9.0",
+    "babelrc-rollup": "2.0.0",
+    "faker": "1.0.0",
+    "mkdirp": "0.5.1",
+    "mocha": "2.5.3",
+    "normalize.css": "4.2.0",
+    "rimraf": "2.5.3",
+    "rollup": "0.26.3",
+    "rollup-plugin-babel": "2.3.9",
+    "rollup-plugin-postcss": "0.1.1"
+  },
+  "dependencies": {
+    "@zambezi/d3-utils": "^3.0.0",
+    "d3-dispatch": "^1.0.1",
+    "d3-selection": "^1.0.0"
   }
 }
