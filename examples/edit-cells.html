@@ -23,31 +23,31 @@
           .columns(
             [
               { key: 'name', locked: 'left', width: 200 }
-            , { key: 'email', sortDescending: true }
-            , { key: 'phone' }
             , {
                 key: 'username'
               , components: [
                   gridComponents.createEditCellValue()
+                      .on('change', onUsernameChange)
+                      .characterClass('A-Za-z')
                 , grid.updateTextIfChanged
                 ]
               }
-            , {
-                label: 'address'
-              , children: [
-                  { label: 'city', key: 'address.city', width: 300 }
-                , { label: 'country', key: 'address.ukCountry' }
-                , { label: 'county', key: 'address.ukCounty' }
-                ]
-              }
+            , { key: 'email', sortDescending: true }
+            , { key: 'phone' }
             ]
           )
+          .on('draw', () => console.log('grid draw'))
     , rows = _.range(1, 2000).map(faker.Helpers.createCard)
 
   d3.select('.grid-target')
       .style('height', '500px')
       .datum(rows)
       .call(table)
+
+  function onUsernameChange(row, value) {
+    console.debug('onUsernameChange', this, row, value)
+    row.username = value
+  }
 
 </script>
 </body>

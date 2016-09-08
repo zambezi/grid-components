@@ -29,6 +29,7 @@ export function createEditCell() {
     target.each(draw)
 
     function draw(d, i) {
+
       const isEditable = editable.call(this, d, i)
           , row = unwrap(d.row)
           , temp = rowToTemp.get(row)
@@ -40,8 +41,12 @@ export function createEditCell() {
         d.isValidInput = !!temp.valid
 
         component.on('partialedit.cache', cacheTemp)
-            .on('cancel.clear', cancelTemp)
-            .on('commit.clear', clearTemp)
+
+            .on('cancel.clear', removeTmp)
+            .on('cancel.redraw', () => select(this).dispatch('redraw', { bubbles: true }) )
+
+            .on('commit.clear', onCommit)
+            .on('commit.redraw', () => select(this).dispatch('redraw', { bubbles: true }) )
 
         cell.select(append)
             .call(component)
@@ -68,23 +73,25 @@ export function createEditCell() {
       rowToTemp.set(unwrap(d.row), {value: this.value, valid: true})
     }
 
-    function cancelTemp(d) {
+    function removeTmp(d) {
+      console.debug('removeTmp')
       rowToTemp.delete(unwrap(d.row))
-      select(this).dispatch('redraw', { bubbles: true })
     }
 
-    function clearTemp(d) {
+    function onCommit(d) {
+
+      console.debug('onCommit')
+
       const reason = validate.call(this, d, i)
+
       if (!reason)  {
-        cancelTemp(d)
+        removeTmp(d)
         dispatch.call('change', this, unwrap(d.row), this.value)
       } else {
         rowToTemp.set(unwrap(d.row), { value: this.value, valid: false })
-        select(this).dispatch('redraw', { bubble: true })
         dispatch.call('validationerror', this, reason)
       }
     }
-
   }
 
   editCellEach.component = function(value) {

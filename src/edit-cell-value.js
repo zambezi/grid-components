@@ -1,4 +1,4 @@
-import { appendIfMissing, rebind, keyCodeHandler } from '@zambezi/d3-utils'
+import { appendIfMissing, rebind, keyCodeHandler, createCharacterClassValidator } from '@zambezi/d3-utils'
 import { createEditCell } from './edit-cell'
 import { dispatch as createDispatch } from 'd3-dispatch'
 import { select } from 'd3-selection'
@@ -7,16 +7,18 @@ import { someResult as some } from '@zambezi/fun'
 const appendInput = appendIfMissing('input.edit-value')
 
 export function createEditCellValue() {
-  
-  const editValueComponent = createEditValue()
-  return rebind()
-            // .from(editValueComponent, 'characterClass')
-            (createEditCell().component(createEditValue()))
+  const editValue = createEditValue()
+      , editCell = createEditCell().component(editValue)
+
+  return rebind().from(editValue, 'characterClass')(editCell)
 }
 
 function createEditValue() {
   const dispatch = createDispatch('partialedit', 'commit', 'cancel')
-      , api = rebind().from(dispatch, 'on')
+      , characterClassValidator = createCharacterClassValidator()
+      , api = rebind()
+                .from(dispatch, 'on')
+                .from(characterClassValidator, 'characterClass')
 
   let keyDownHandlers = []
 
@@ -42,21 +44,21 @@ function createEditValue() {
             .select(appendInput)
               .classed('error', !d.isValidInput)
               .property('value', d.tempInput || '')
-              .on('input', () => dispatch.call('partialedit', this, d))
-              // .on('keypress.valid-character', characterClassValidator)
+              .on('input', () => dispatch.call('partialedit', input.node(), d))
+              .on('keypress.valid-character', characterClassValidator)
               .on(
                 'keydown.process'
               , some.apply(
                     null
                   , keyDownHandlers.concat(
                       [
-                        keyCodeHandler(() => console.log('13', input.node()), 13)
-                      , keyCodeHandler((d) => dispatch.call('cancel', this, d), 27)
+                        keyCodeHandler((d) => dispatch.call('commit', input.node(), d), 13)
+                      , keyCodeHandler((d) => dispatch.call('cancel', input.node(), d), 27)
                       ]
                     )
                 )
               )
-              .on('blur.process', (d) => dispatch.call('commit', this, d))
+              .on('blur.process', (d) => dispatch.call('commit', input.node(), d))
 
     if (d.isValidInput) input.node().focus()
   }
