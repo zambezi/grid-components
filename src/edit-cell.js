@@ -40,11 +40,10 @@ export function createEditCell() {
         d.tempInput = temp.value
         d.isValidInput = !!temp.valid
 
-        component.on('partialedit.cache', cacheTemp)
-
+        component
+            .on('partialedit.cache', cacheTemp)
             .on('cancel.clear', removeTmp)
             .on('cancel.redraw', () => select(this).dispatch('redraw', { bubbles: true }) )
-
             .on('commit.clear', onCommit)
             .on('commit.redraw', () => select(this).dispatch('redraw', { bubbles: true }) )
 
@@ -82,7 +81,7 @@ export function createEditCell() {
 
       console.debug('onCommit')
 
-      const reason = validate.call(this, d, i)
+      const reason = validate.call(this, d, this.value)
 
       if (!reason)  {
         removeTmp(d)
