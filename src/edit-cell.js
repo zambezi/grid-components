@@ -77,9 +77,9 @@ export function createEditCell() {
       const reason = validate.call(this, d, i)
       if (!reason)  {
         cancelTemp(d)
-        dispatch.call('change', this, unwrap(d.row), i)
+        dispatch.call('change', this, unwrap(d.row), this.value)
       } else {
-        rowToTemp.set(unwrap(d.row), {value: this.value, valid: false})
+        rowToTemp.set(unwrap(d.row), { value: this.value, valid: false })
         select(this).dispatch('redraw', { bubble: true })
         dispatch.call('validationerror', this, reason)
       }
