@@ -28,7 +28,9 @@
               , components: [
                   gridComponents.createEditCellValue()
                       .on('change', onUsernameChange)
+                      .on('validationerror', console.error.bind(console, 'VALIDATION'))
                       .characterClass('A-Za-z')
+                      .validate(validateUserName)
                 , grid.updateTextIfChanged
                 ]
               }
@@ -36,7 +38,6 @@
             , { key: 'phone' }
             ]
           )
-          .on('draw', () => console.log('grid draw'))
     , rows = _.range(1, 2000).map(faker.Helpers.createCard)
 
   d3.select('.grid-target')
@@ -47,6 +48,21 @@
   function onUsernameChange(row, value) {
     console.debug('onUsernameChange', this, row, value)
     row.username = value
+  }
+
+  function validateUserName(row, value) {
+    if (!value) return 'Username cannot be empty'
+    if (!value.split('').some(isDifferentCharacter())) return 'Cannot all be the same character'
+
+  }
+
+  function isDifferentCharacter() {
+    let found
+    return function check(ch) {
+      if (found && !~found.indexOf(ch)) return true
+      found = ch
+      return false
+    }
   }
 
 </script>
