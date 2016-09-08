@@ -34,3 +34,7 @@
 .zambezi-grid-row .zambezi-grid-cell.is-editing .formatted-text {
   display: none;
 }
+
+.zambezi-grid-row .edit-value.error {
+  background-color: #FCC;
+}
