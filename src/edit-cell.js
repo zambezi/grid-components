@@ -73,14 +73,10 @@ export function createEditCell() {
     }
 
     function removeTmp(d) {
-      console.debug('removeTmp')
       rowToTemp.delete(unwrap(d.row))
     }
 
     function onCommit(d) {
-
-      console.debug('onCommit')
-
       const reason = validate.call(this, d, this.value)
 
       if (!reason)  {

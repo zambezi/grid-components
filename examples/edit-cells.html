@@ -1,7 +1,29 @@
 <!doctype html>
 <head><meta charset="utf-8" /></head>
 <body>
-<h2>grid components examples</h2>
+<h1>Edit cell values</h1>
+
+<p>
+  This example showcases the edit-cell component.
+  Cells on the _username_ column are editable.
+  Double-click on them and change their value.
+</p>
+
+<h2>Configuration</h2>
+
+<p>
+  Some extra example configuration has been added:
+</p>
+
+<dl>
+  <dt>Validation</dt>
+  <dd>Username cannot be empty</dd>
+  <dd>Username cannot use only one letter </dd>
+  <dt>Character class for input</dt><dd>Only uppercase and lower case ASCII characters and numbers between 0 and 5 can used to input usernames.</dd>
+  <dt>Non editable cells</dt><dd>Cells for rows in which the username begins with "Zac" cannot be edited</dd>
+  <dt>Processing</dt><dd>Client can decide how to consolidate the change; in this case, it is turned into upper case</dd>
+</dl>
+
 <div class="grid-target"></div>
 <link rel="stylesheet" type="text/css" href="../node_modules/normalize.css/normalize.css">
 <script src="../node_modules/underscore/underscore.js"></script>
@@ -29,7 +51,7 @@
                   gridComponents.createEditCellValue()
                       .on('change', onUsernameChange)
                       .on('validationerror', console.error.bind(console, 'VALIDATION'))
-                      .characterClass('A-Z0-5')
+                      .characterClass('A-Za-z0-5')
                       .validate(validateUserName)
                       .editable(isNotZack)
 
@@ -48,8 +70,7 @@
       .call(table)
 
   function onUsernameChange(row, value) {
-    console.debug('onUsernameChange', this, row, value)
-    row.username = value
+    row.username = value.toUpperCase()
   }
 
   function validateUserName(row, value) {
