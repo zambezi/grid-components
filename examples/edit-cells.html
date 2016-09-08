@@ -29,8 +29,10 @@
                   gridComponents.createEditCellValue()
                       .on('change', onUsernameChange)
                       .on('validationerror', console.error.bind(console, 'VALIDATION'))
-                      .characterClass('A-Za-z')
+                      .characterClass('A-Z0-5')
                       .validate(validateUserName)
+                      .editable(isNotZack)
+
                 , grid.updateTextIfChanged
                 ]
               }
@@ -53,7 +55,6 @@
   function validateUserName(row, value) {
     if (!value) return 'Username cannot be empty'
     if (!value.split('').some(isDifferentCharacter())) return 'Cannot all be the same character'
-
   }
 
   function isDifferentCharacter() {
@@ -63,6 +64,10 @@
       found = ch
       return false
     }
+  }
+
+  function isNotZack(cell) {
+    return cell.row.username.indexOf('Zac') !== 0
   }
 
 </script>
