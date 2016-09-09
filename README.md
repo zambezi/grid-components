@@ -8,9 +8,14 @@ Usage
 
 1. [Download the latest release](../../releases/latest)
 2. Extract the downloaded archive
-3. Follow the checklist below
+3. Open the examples in the `/examples` folder.
 
 Do *not* clone this project, unless you intend to actually [contribute changes](CONTRIBUTING.md) which is more than welcome!
+
+Detailed usage
+--------------
+
+For detail usage, please refer to the [Summary](SUMMARY.md) and the provided examples.
 
 Found an issue, or want to contribute?
 --------------------------------------
