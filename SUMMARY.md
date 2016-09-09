@@ -6,3 +6,6 @@
 
 - [Authors](AUTHORS.md)
 - [License](LICENSE.md)
+
+- Components
+  - [edit cell value](man/edit-cell-value.md)
