@@ -1,0 +1,40 @@
+.zambezi-grid-body .edit-cell-input input {
+    border: 1px inset #1673BA;
+}
+
+.zambezi-grid-body .edit-cell-input input:hover {
+    border: none;
+}
+
+.zambezi-grid-body .zambezi-grid-row .editable-cell:hover,
+.zambezi-grid-body .zambezi-grid-row:hover .editable-cell:hover {
+    border: 1px solid #268CDE;
+    border-bottom: 1px solid #268CDE;
+    border-right: 1px solid #268CDE;
+}
+
+.zambezi-grid-body .zambezi-grid-row.is-selected .editable-cell:hover,
+.zambezi-grid-body .zambezi-grid-row.is-selected:hover .editable-cell:hover {
+    border-bottom: 2px solid #268CDE;
+}
+
+.zambezi-grid-cell .edit-cell-input input {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.zambezi-grid-row .zambezi-grid-cell.is-editing {
+  overflow: inherit;
+}
+
+.zambezi-grid-row .zambezi-grid-cell.is-editing .formatted-text {
+  display: none;
+}
+
+.zambezi-grid-row .edit-value.error {
+  background-color: #FCC;
+}
