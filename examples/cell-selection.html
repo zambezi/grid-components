@@ -14,7 +14,11 @@
 <script src="../dist/grid-components.js"></script>
 <script>
 
-  var table = grid.createGrid()
+  var rows = _.range(1, 2000).map(faker.Helpers.createCard)
+    , cellSelection = gridComponents.createCellSelection()
+        .on('cell-selected-change', s => console.log('cell selected change', s))
+
+    , table = grid.createGrid()
           .columns(
             [
               { key: 'name', locked: 'left', width: 200 }
@@ -24,7 +28,8 @@
             ]
           )
           .use(console.log.bind(console, 'COMPONENT'))
-    , rows = _.range(1, 2000).map(faker.Helpers.createCard)
+          .use(cellSelection)
+
 
   d3.select('.grid-target')
       .style('height', '500px')
