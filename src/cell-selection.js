@@ -46,13 +46,12 @@ export function createCellSelection() {
         .on('cell-update.cell-selection', onCellUpdate)
 
     function updateFromCandidates() {
-      selectedRowsByColumnId = selectedCandidates.reduce(toRealCells, {})
-      compileSelected()
+      selectedRowsByColumnId = selectedCandidates.reduce(toRealSelection, {})
+      selected = compileSelected()
       selectedCandidates = null
     }
 
-    function toRealCells(acc, { row, column }) {
-
+    function toRealSelection(acc, { row, column }) {
       const columnFound = typeof column == 'string' ? columnById[column] : column
           , rowFound = typeof row == 'number' ? rows[row] : row
 
@@ -71,8 +70,7 @@ export function createCellSelection() {
 
     function compileSelected() {
       columnById = indexBy(rows.columns, 'id')
-      selected = reduce(selectedRowsByColumnId, toCells, [])
-      return selected
+      return reduce(selectedRowsByColumnId, toCells, [])
     }
 
     function onCellEnter(d, i) {
@@ -88,14 +86,14 @@ export function createCellSelection() {
       // Here'd be fancier Shift+Click all that jazz
       if (set.has(row)) {
         set.delete(row)
-        if (areSameCell(d, active)) active = null
       } else {
         set.add(row)
-        active = d
+        active = { row, column }
       }
 
       selectedRowsByColumnId[columnId] = set
-      dispatch.call('cell-selected-change', this, compileSelected(), active)
+      selected = compileSelected()
+      dispatch.call('cell-selected-change', this, selected, active)
       select(this).dispatch('redraw', { bubbles: true })
     }
 
@@ -117,10 +115,11 @@ export function createCellSelection() {
   }
 
   function isCellActive(d) {
+    if (!active) return false
     return areSameCell(d, active)
   }
 }
 
 function areSameCell(a, b) {
-  return a && b && a.row == b.row && a.column == b.column
+  return a && b && unwrap(a.row) == unwrap(b.row) && a.column == b.column
 }
