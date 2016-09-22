@@ -1,6 +1,7 @@
 import { dispatch  as createDispatch }  from 'd3-dispatch'
 import { rebind, forward } from '@zambezi/d3-utils'
 import { select } from 'd3-selection'
+import { unwrap } from '@zambezi/grid'
 
 import './cell-selection.css'
 
@@ -9,7 +10,8 @@ export function createCellSelection() {
   const dispatch = createDispatch('cell-selected-change')
 
   let gesture = 'click'
-    , selected = []
+    , selected
+    , selectedCandidates
     , selectedRowsByColumnId = {}
 
   function cellSelection(s) {
@@ -17,22 +19,30 @@ export function createCellSelection() {
   }
 
   cellSelection.selected = function(value) {
-    if (!arguments.length) return selected
-    selected = value
+    if (!arguments.length) return selected || compileSelected()
+    selectedCandidates = value
     return cellSelection
   }
 
   return rebind().from(dispatch, 'on')(cellSelection)
 
   function cellSelectionEach(d, i) {
-
     const target = select(this)
 
-    console.info('CONSOLIDATE SELECTED CELLS')
+    consolidateSelected()
 
     d.dispatcher
         .on('cell-enter.cell-selection', onCellEnter)
         .on('cell-update.cell-selection', onCellUpdate)
+  }
+
+  function consolidateSelected() {
+    selected = null
+    selectedCandidates = null
+  }
+
+  function compileSelected() {
+    selected = 'whareva'
   }
 
   function onCellEnter(d, i) {
@@ -44,10 +54,17 @@ export function createCellSelection() {
   }
 
   function isCellSelected(d, i) {
-    return Math.random() > 0.5
+    const rowSetForColumn = selectedRowsByColumnId[d.column.id]
+    return rowSetForColumn && rowSetForColumn.has(unwrap(d.row))
   }
 
   function onClick(d, i) {
-    console.debug('onClick cell select', d.column.id, d.row)
+    const columnId = d.column.id
+        , set = selectedRowsByColumnId[columnId] || new Set()
+
+    set.add(unwrap(d.row))
+    selectedRowsByColumnId[columnId] = set
+
+    select(this).dispatch('redraw', { bubbles: true })
   }
 }
