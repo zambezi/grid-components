@@ -1,5 +1,6 @@
 import { dispatch  as createDispatch }  from 'd3-dispatch'
 import { rebind, forward } from '@zambezi/d3-utils'
+import { reduce, indexBy } from 'underscore'
 import { select } from 'd3-selection'
 import { unwrap } from '@zambezi/grid'
 
@@ -13,6 +14,8 @@ export function createCellSelection() {
     , selected
     , selectedCandidates
     , selectedRowsByColumnId = {}
+    , columnById = {}
+    , active
 
   function cellSelection(s) {
     s.each(cellSelectionEach)
@@ -24,25 +27,41 @@ export function createCellSelection() {
     return cellSelection
   }
 
+  cellSelection.active = function(value) {
+    if (!arguments.length) return active
+    active = value
+    return cellSelection
+  }
+
   return rebind().from(dispatch, 'on')(cellSelection)
 
   function cellSelectionEach(d, i) {
     const target = select(this)
+
+    console.debug('active', active)
 
     consolidateSelected()
 
     d.dispatcher
         .on('cell-enter.cell-selection', onCellEnter)
         .on('cell-update.cell-selection', onCellUpdate)
-  }
 
-  function consolidateSelected() {
-    selected = null
-    selectedCandidates = null
+    function consolidateSelected() {
+      console.debug('consolidateSelected')
+      selected = null
+      selectedCandidates = null
+    }
   }
 
   function compileSelected() {
-    selected = 'whareva'
+    columnById = indexBy(d.columns, 'id')
+    selected = reduce(selectedRowsByColumnId, toCells, [])
+    return selected
+  }
+
+  function toCells(acc, set, columnId) {
+    const column = columnById[columnId]
+    return acc.concat(Array.from(set.values()).map(row => ({ row, column })))
   }
 
   function onCellEnter(d, i) {
@@ -50,7 +69,9 @@ export function createCellSelection() {
   }
 
   function onCellUpdate(d, i){
-    select(this).classed('is-selected', isCellSelected)
+    select(this)
+        .classed('is-selected', isCellSelected)
+        .classed('is-active', isCellActive)
   }
 
   function isCellSelected(d, i) {
@@ -58,13 +79,29 @@ export function createCellSelection() {
     return rowSetForColumn && rowSetForColumn.has(unwrap(d.row))
   }
 
+  function isCellActive(d) {
+    return areSameCell(d, active)
+  }
+
   function onClick(d, i) {
-    const columnId = d.column.id
+    const column = d.column
+        , columnId = column.id
         , set = selectedRowsByColumnId[columnId] || new Set()
+        , row = unwrap(d.row)
 
-    set.add(unwrap(d.row))
+    if (set.has(row)) { 
+      set.delete(row)
+      if (areSameCell(d, active)) active = null
+    } else { 
+      set.add(row)
+      active = d
+    }
+
     selectedRowsByColumnId[columnId] = set
-
     select(this).dispatch('redraw', { bubbles: true })
   }
+}
+
+function areSameCell(a, b) {
+  return a && b && a.row == b.row && a.column == b.column
 }
