@@ -1,6 +1,6 @@
 import { dispatch  as createDispatch }  from 'd3-dispatch'
 import { rebind, forward } from '@zambezi/d3-utils'
-import { reduce, indexBy } from 'underscore'
+import { reduce, indexBy, findWhere } from 'underscore'
 import { select } from 'd3-selection'
 import { unwrap } from '@zambezi/grid'
 
@@ -11,7 +11,7 @@ export function createCellSelection() {
   const dispatch = createDispatch('cell-selected-change')
 
   let gesture = 'click'
-    , selected
+    , selected = []
     , selectedCandidates
     , selectedRowsByColumnId = {}
     , columnById = {}
@@ -22,7 +22,7 @@ export function createCellSelection() {
   }
 
   cellSelection.selected = function(value) {
-    if (!arguments.length) return selected || compileSelected()
+    if (!arguments.length) return selected
     selected = value
     selectedCandidates = value
     return cellSelection
@@ -36,18 +36,43 @@ export function createCellSelection() {
 
   return rebind().from(dispatch, 'on')(cellSelection)
 
-  function cellSelectionEach(d, i) {
+  function cellSelectionEach(rows, i) {
     const target = select(this)
 
-    if (selectedCandidates) consolidateSelected()
+    if (selectedCandidates) updateFromCandidates()
 
-    d.dispatcher
+    rows.dispatcher
         .on('cell-enter.cell-selection', onCellEnter)
         .on('cell-update.cell-selection', onCellUpdate)
 
-    function consolidateSelected() {
-      console.info('consolidateSelected', selectedCandidates)
+    function updateFromCandidates() {
+      selectedRowsByColumnId = selectedCandidates.reduce(toRealCells, {})
+      compileSelected()
       selectedCandidates = null
+    }
+
+    function toRealCells(acc, { row, column }) {
+
+      const columnFound = typeof column == 'string' ? columnById[column] : column
+          , rowFound = typeof row == 'number' ? rows[row] : row
+
+      if (!columnFound || !rowFound) {
+        console.warn("Couldn't find cell for", { row, column })
+        return acc
+      }
+
+      const columnId = columnFound.id
+          , set = acc[columnId] || new Set()
+
+      set.add(rowFound)
+      acc[columnId] = set
+      return acc
+    }
+
+    function compileSelected() {
+      columnById = indexBy(rows.columns, 'id')
+      selected = reduce(selectedRowsByColumnId, toCells, [])
+      return selected
     }
 
     function onCellEnter(d, i) {
@@ -60,6 +85,7 @@ export function createCellSelection() {
           , set = selectedRowsByColumnId[columnId] || new Set()
           , row = unwrap(d.row)
 
+      // Here'd be fancier Shift+Click all that jazz
       if (set.has(row)) {
         set.delete(row)
         if (areSameCell(d, active)) active = null
@@ -71,12 +97,6 @@ export function createCellSelection() {
       selectedRowsByColumnId[columnId] = set
       dispatch.call('cell-selected-change', this, compileSelected(), active)
       select(this).dispatch('redraw', { bubbles: true })
-    }
-
-    function compileSelected() {
-      columnById = indexBy(d.columns, 'id')
-      selected = reduce(selectedRowsByColumnId, toCells, [])
-      return selected
     }
 
     function toCells(acc, set, columnId) {

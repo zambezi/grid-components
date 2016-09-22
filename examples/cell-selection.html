@@ -3,7 +3,13 @@
 <body>
 
 <div class="grid-target"></div>
-<pre id='output'></pre>
+
+<p>
+  <button id="clear-selection">clear selection</button>
+  <button id="programmatic-select">programmtically select some cells</button>
+</p>
+
+<pre id="output"></pre>
 
 <link rel="stylesheet" type="text/css" href="../node_modules/normalize.css/normalize.css">
 <script src="../node_modules/underscore/underscore.js"></script>
@@ -15,9 +21,12 @@
 <script src="../dist/grid-components.js"></script>
 <script>
 
-  var rows = _.range(1, 2000).map(faker.Helpers.createCard)
-    , cellSelection = gridComponents.createCellSelection()
-          .on('cell-selected-change.so', onCellSelectedChange)
+  var rows = _.range(1, 20).map(faker.Helpers.createCard)
+    , cells = gridComponents.createCellSelection()
+          .on(
+            'cell-selected-change.log'
+          , (selected, active) => console.log(horribleBanner(selected, active))
+          )
 
     , table = grid.createGrid()
           .columns(
@@ -25,28 +34,49 @@
               { key: 'name', locked: 'left', width: 200 }
             , { key: 'username' }
             , { key: 'email', sortDescending: true }
-            , { label: 'some synthetic summary', format: summary }
+            , { 
+                label: 'some synthetic column'
+              , format: summary
+              , sort: (a, b) => d3.ascending(a.name, b.name)
+              }
             , { key: 'phone' }
             ]
           )
-          .usePre(cellSelection)
+          .usePre(cells)
+          .on('draw.log', onDraw)
 
     , output = d3.select('#output')
+    , target = d3.select('.grid-target')
+          .style('height', '300px')
+          .datum(rows)
+          .call(table)
 
-  d3.select('.grid-target')
-      .style('height', '300px')
-      .datum(rows)
-      .call(table)
+  d3.select('#clear-selection')
+      .on('click.reset', () => cells.selected([]))
+      .on('click.redraw', () => target.call(table))
 
-  function onCellSelectedChange(selected, active) {
-    output.text(
-      `ACTIVE
-      \n${ active ? toRepr(active) : '(no active cell)' }
-      \nSELECTED 
-      \n${ selected.map(toRepr).join('\n') }
+  d3.select('#programmatic-select')
+      .on('click.reset', () => cells.selected(bunchOfCells()))
+      .on('click.redraw', () => target.call(table))
 
-      \n▒▓ ${ Date.now().toString(32).toUpperCase() }
-      `
+  function onDraw() {
+    output.text(horribleBanner(cells.selected(), cells.active()))
+  }
+
+  function horribleBanner(selected, active) {
+    return `ACTIVE
+    \n${ active ? toRepr(active) : '(no active cell)' }
+    \nSELECTED 
+    \n${ selected.map(toRepr).join('\n') }
+
+    \n▒▓ ${ Date.now().toString(32).toUpperCase() }
+    `
+  }
+
+  function bunchOfCells() {
+    return d3.range(
+      _.random(10, 40))
+          .map(() => ({ row: _.sample(rows), column: _.sample(table.columns()) })
     )
   }
 
