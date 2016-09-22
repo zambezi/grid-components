@@ -69,7 +69,7 @@ export function createCellSelection() {
       }
 
       selectedRowsByColumnId[columnId] = set
-      dispatch.call('cell-selected-change', this, compileSelected())
+      dispatch.call('cell-selected-change', this, compileSelected(), active)
       select(this).dispatch('redraw', { bubbles: true })
     }
 

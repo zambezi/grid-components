@@ -17,7 +17,7 @@
 
   var rows = _.range(1, 2000).map(faker.Helpers.createCard)
     , cellSelection = gridComponents.createCellSelection()
-        .on('cell-selected-change', s => console.log('cell selected change', s))
+          .on('cell-selected-change.so', onCellSelectedChange)
 
     , table = grid.createGrid()
           .columns(
@@ -25,13 +25,12 @@
               { key: 'name', locked: 'left', width: 200 }
             , { key: 'username' }
             , { key: 'email', sortDescending: true }
+            , { label: 'some synthetic summary', format: summary }
             , { key: 'phone' }
             ]
           )
-          .usePre(
-            cellSelection
-                .on('cell-selected-change.so', onCellSelectedChange)
-          )
+          .usePre(cellSelection)
+
     , output = d3.select('#output')
 
   d3.select('.grid-target')
@@ -39,13 +38,24 @@
       .datum(rows)
       .call(table)
 
-  function onCellSelectedChange(selected) {
+  function onCellSelectedChange(selected, active) {
     output.text(
-      `CELLS
-      \n${ selected.map(({column, row}) => column.id + '> '+column.value(row)).join('\n') }
+      `ACTIVE
+      \n${ active ? toRepr(active) : '(no active cell)' }
+      \nSELECTED 
+      \n${ selected.map(toRepr).join('\n') }
 
-      --`
+      \n▒▓ ${ Date.now().toString(32).toUpperCase() }
+      `
     )
+  }
+
+  function toRepr({column , row}) {
+    return column.id + ' <' + column.format(column.value(row)) + '>' 
+  }
+
+  function summary(row) {
+    return `${row.username.slice(0, 3)} -- ${row.address.city}`
   }
 
 </script>
