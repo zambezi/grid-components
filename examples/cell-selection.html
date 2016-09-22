@@ -27,14 +27,19 @@
             , { key: 'phone' }
             ]
           )
-          .use(console.log.bind(console, 'COMPONENT'))
-          .use(cellSelection)
-
+          .usePre(
+            cellSelection
+                .on('cell-selected-change.so', onCellSelectedChange)
+          )
 
   d3.select('.grid-target')
       .style('height', '500px')
       .datum(rows)
       .call(table)
+
+  function onCellSelectedChange(d, i) {
+    console.log('onCellSelectedChange', this, d, i)
+  }
 
 </script>
 </body>
