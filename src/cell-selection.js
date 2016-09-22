@@ -23,6 +23,7 @@ export function createCellSelection() {
 
   cellSelection.selected = function(value) {
     if (!arguments.length) return selected || compileSelected()
+    selected = value
     selectedCandidates = value
     return cellSelection
   }
@@ -38,34 +39,50 @@ export function createCellSelection() {
   function cellSelectionEach(d, i) {
     const target = select(this)
 
-    console.debug('active', active)
-
-    consolidateSelected()
+    if (selectedCandidates) consolidateSelected()
 
     d.dispatcher
         .on('cell-enter.cell-selection', onCellEnter)
         .on('cell-update.cell-selection', onCellUpdate)
 
     function consolidateSelected() {
-      console.debug('consolidateSelected')
-      selected = null
+      console.info('consolidateSelected', selectedCandidates)
       selectedCandidates = null
     }
-  }
 
-  function compileSelected() {
-    columnById = indexBy(d.columns, 'id')
-    selected = reduce(selectedRowsByColumnId, toCells, [])
-    return selected
-  }
+    function onCellEnter(d, i) {
+      select(this).on('click.cell-selection', onClick)
+    }
 
-  function toCells(acc, set, columnId) {
-    const column = columnById[columnId]
-    return acc.concat(Array.from(set.values()).map(row => ({ row, column })))
-  }
+    function onClick(d, i) {
+      const column = d.column
+          , columnId = column.id
+          , set = selectedRowsByColumnId[columnId] || new Set()
+          , row = unwrap(d.row)
 
-  function onCellEnter(d, i) {
-    select(this).on('click.cell-selection', onClick)
+      if (set.has(row)) {
+        set.delete(row)
+        if (areSameCell(d, active)) active = null
+      } else {
+        set.add(row)
+        active = d
+      }
+
+      selectedRowsByColumnId[columnId] = set
+      dispatch.call('cell-selected-change', this, compileSelected())
+      select(this).dispatch('redraw', { bubbles: true })
+    }
+
+    function compileSelected() {
+      columnById = indexBy(d.columns, 'id')
+      selected = reduce(selectedRowsByColumnId, toCells, [])
+      return selected
+    }
+
+    function toCells(acc, set, columnId) {
+      const column = columnById[columnId]
+      return acc.concat(Array.from(set.values()).map(row => ({ row, column })))
+    }
   }
 
   function onCellUpdate(d, i){
@@ -81,24 +98,6 @@ export function createCellSelection() {
 
   function isCellActive(d) {
     return areSameCell(d, active)
-  }
-
-  function onClick(d, i) {
-    const column = d.column
-        , columnId = column.id
-        , set = selectedRowsByColumnId[columnId] || new Set()
-        , row = unwrap(d.row)
-
-    if (set.has(row)) { 
-      set.delete(row)
-      if (areSameCell(d, active)) active = null
-    } else { 
-      set.add(row)
-      active = d
-    }
-
-    selectedRowsByColumnId[columnId] = set
-    select(this).dispatch('redraw', { bubbles: true })
   }
 }
 

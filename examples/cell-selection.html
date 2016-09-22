@@ -3,6 +3,7 @@
 <body>
 
 <div class="grid-target"></div>
+<pre id='output'></pre>
 
 <link rel="stylesheet" type="text/css" href="../node_modules/normalize.css/normalize.css">
 <script src="../node_modules/underscore/underscore.js"></script>
@@ -31,14 +32,20 @@
             cellSelection
                 .on('cell-selected-change.so', onCellSelectedChange)
           )
+    , output = d3.select('#output')
 
   d3.select('.grid-target')
-      .style('height', '500px')
+      .style('height', '300px')
       .datum(rows)
       .call(table)
 
-  function onCellSelectedChange(d, i) {
-    console.log('onCellSelectedChange', this, d, i)
+  function onCellSelectedChange(selected) {
+    output.text(
+      `CELLS
+      \n${ selected.map(({column, row}) => column.id + '> '+column.value(row)).join('\n') }
+
+      --`
+    )
   }
 
 </script>
