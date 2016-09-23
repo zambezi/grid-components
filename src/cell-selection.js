@@ -14,7 +14,6 @@ export function createCellSelection() {
     , selected = []
     , selectedCandidates
     , selectedRowsByColumnId = {}
-    , columnById = {}
     , active
 
   function cellSelection(s) {
@@ -38,6 +37,7 @@ export function createCellSelection() {
 
   function cellSelectionEach(bundle, i) {
     const target = select(this)
+        , columnById = indexBy(bundle.columns, 'id')
 
     if (selectedCandidates) updateFromCandidates()
 
@@ -69,7 +69,6 @@ export function createCellSelection() {
     }
 
     function compileSelected() {
-      columnById = indexBy(bundle.columns, 'id')
       return reduce(selectedRowsByColumnId, toCells, [])
     }
 

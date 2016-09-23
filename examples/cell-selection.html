@@ -7,6 +7,7 @@
 <p>
   <button id="clear-selection">clear selection</button>
   <button id="programmatic-select">programmtically select some cells</button>
+  <button id="programmatic-select-by-indices">programmtically select some cells (using row index and column id)</button>
 </p>
 
 <pre id="output"></pre>
@@ -23,20 +24,18 @@
 
   var rows = _.range(1, 50).map(faker.Helpers.createCard)
     , cells = gridComponents.createCellSelection()
-          /*
           .on(
             'cell-selected-change.log'
           , (selected, active) => console.log(horribleBanner(selected, active))
           )
-          */
 
     , table = grid.createGrid()
           .columns(
             [
               { key: 'name', locked: 'left', width: 200 }
             , { key: 'username' }
-            , { key: 'email', sortDescending: true }
-            , { 
+            , { key: 'email' }
+            , {
                 label: 'some synthetic column'
               , format: summary
               , sort: (a, b) => d3.ascending(a.name, b.name)
@@ -62,6 +61,14 @@
       .on('click.reset', () => cells.selected(bunchOfCells()))
       .on('click.redraw', () => target.call(table))
 
+  d3.select('#programmatic-select-by-indices')
+      .on('click.clear', () => console.clear())
+      .on(
+        'click.reset'
+      , () => cells.selected([ { row: 1, column: 'username' }, { row: 2, column: 'email'} ])
+      )
+      .on('click.redraw', () => target.call(table))
+
   function onDraw() {
     output.text(horribleBanner(cells.selected(), cells.active()))
   }
@@ -69,7 +76,7 @@
   function horribleBanner(selected, active) {
     return `ACTIVE
     \n${ active ? toRepr(active) : '(no active cell)' }
-    \nSELECTED 
+    \nSELECTED
     \n${ selected.map(toRepr).join('\n') }
 
     \n▒▓ ${ Date.now().toString(32).toUpperCase() }
@@ -84,7 +91,7 @@
   }
 
   function toRepr({column , row}) {
-    return column.id + ' <' + column.format(column.value(row)) + '>' 
+    return column.id + ' <' + column.format(column.value(row)) + '>'
   }
 
   function summary(row) {
