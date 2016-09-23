@@ -1,7 +1,7 @@
 import { dispatch  as createDispatch }  from 'd3-dispatch'
 import { rebind, forward } from '@zambezi/d3-utils'
 import { reduce, indexBy, findWhere } from 'underscore'
-import { select } from 'd3-selection'
+import { select, event } from 'd3-selection'
 import { unwrap } from '@zambezi/grid'
 
 import './cell-selection.css'
@@ -80,21 +80,49 @@ export function createCellSelection() {
     function onClick(d, i) {
       const column = d.column
           , columnId = column.id
-          , set = selectedRowsByColumnId[columnId] || new Set()
+          , set = selectedRowsByColumnId[columnId]
           , row = unwrap(d.row)
+          , shift = event.shiftKey
+          , ctrl = event.ctrlKey
+          , target = { row, column }
+          , isAlreadySelected = set && set.has(row)
 
-      // Here'd be fancier Shift+Click all that jazz
-      if (set.has(row)) {
-        set.delete(row)
-      } else {
-        set.add(row)
-        active = { row, column }
+      switch(true) {
+        case ctrl && isAlreadySelected: 
+          removeFromSelected(target)
+          break
+        case ctrl: 
+          addToSelected(target)
+          break
+        default:
+          selectOnly(target)
       }
 
-      selectedRowsByColumnId[columnId] = set
+      active = target
       selected = compileSelected()
+
       dispatch.call('cell-selected-change', this, selected, active)
       select(this).dispatch('redraw', { bubbles: true })
+    }
+
+    function selectOnly(target) {
+      selectedRowsByColumnId = {}
+      addToSelected(target)
+    }
+
+    function removeFromSelected({ row, column }) {
+      const columnId = column.id
+          , set = selectedRowsByColumnId[columnId] 
+
+      if (set) set.delete(row)
+    }
+
+    function addToSelected({ row, column }) {
+      const columnId = column.id
+          , set = selectedRowsByColumnId[columnId] || new Set()
+
+      set.add(row)
+      selectedRowsByColumnId[columnId] = set
     }
 
     function toCells(acc, set, columnId) {
