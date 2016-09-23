@@ -23,10 +23,12 @@
 
   var rows = _.range(1, 50).map(faker.Helpers.createCard)
     , cells = gridComponents.createCellSelection()
+          /*
           .on(
             'cell-selected-change.log'
           , (selected, active) => console.log(horribleBanner(selected, active))
           )
+          */
 
     , table = grid.createGrid()
           .columns(
