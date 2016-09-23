@@ -26,7 +26,7 @@ cells.active() // ⇒  { row, column }
 cells.selected([ { row, column }, { row, column }])
 cells.active({ row, column})
 
-target.call(table)  // table must be redraw once the component has been
+target.call(table)  // table must be redrawn once the component has been
                     // reconfigured with the new selection
 ```
 
