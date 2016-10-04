@@ -13,6 +13,7 @@ export default {
   , '@zambezi/grid'
   , 'd3-dispatch'
   , 'd3-selection'
+  , 'underscore'
   ]
 , sourceMap: true
 , plugins: [
@@ -30,5 +31,6 @@ export default {
   , '@zambezi/grid': 'grid'
   , 'd3-dispatch': 'd3'
   , 'd3-selection': 'd3'
+  , 'underscore': '_'
   }
 }

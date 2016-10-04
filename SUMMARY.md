@@ -6,5 +6,8 @@
 - [Authors](AUTHORS.md)
 - [License](LICENSE.md)
 
-- Components
-  - [edit cell value](man/edit-cell-value.md)
+- Grid components
+  - [Cell selection](man/cell-selection.md)
+
+- Column specific components
+  - [Edit cell value](man/edit-cell-value.md)

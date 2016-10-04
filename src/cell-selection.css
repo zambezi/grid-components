@@ -1,0 +1,7 @@
+.zambezi-grid-cell.is-selected {
+  background-color: yellow;
+}
+
+.zambezi-grid-cell.is-active {
+  border: 2px dotted magenta;
+}
