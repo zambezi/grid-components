@@ -1,6 +1,6 @@
 {
   "name": "@zambezi/grid-components",
-  "version": "0.2.0-cell-selection.2",
+  "version": "0.2.0",
   "description": "Components for the Zambezi Grids",
   "keywords": [
     "d3",
