@@ -1,5 +1,5 @@
 import { appendIfMissing, rebind } from '@zambezi/d3-utils'
-import { select, event } from 'd3-selection'
+import { select, selectAll, event } from 'd3-selection'
 import { dispatch as createDispatch } from 'd3-dispatch'
 import { uniqueId } from 'underscore'
 import './cell-popover.css'
@@ -29,22 +29,42 @@ export function createCellPopover() {
               .style('top', `${Math.floor(top + height / 2)}px`)
               .style('left', `${left + width}px`)
               .classed('is-open', true)
+        , gridRoot = select(this)
+            .selectAll(upwards('.zambezi-grid'))
+              .on('grid-scroll.cell-popover', close)
 
     lastCreated = clickCloseEventName
 
     dispatch.call('open', popover.node(), d)
     select('.info-box pre').text(`Created popover for ${d.row.name}`)
-    body.on(clickCloseEventName, onClose)
+    body.on(clickCloseEventName, onClickClose)
 
-    function onClose() {
+    function onClickClose() {
       const target = event.target
       if (popover.node().contains(target)) return
       if (button.contains(target)) return
-      body.on(clickCloseEventName, null)
       event.stopPropagation()
+      body.on(clickCloseEventName, null)
       if (lastCreated !== clickCloseEventName) return
+      close()
+    }
+
+    function close() {
+      gridRoot.on('grid-scroll.cell-popover', null)
+      body.on(clickCloseEventName, null)
       popover.remove()
       dispatch.call('close', popover.node())
     }
   }
+}
+
+function upwards(selector) {
+  function upwardsSelect(d, i) {
+    if (!this.parentNode || this.parentNode === document.body) return null
+    if (selectAll([this.parentNode]).filter(selector).empty()) {
+      return upwardsSelect.apply(this.parentNode, [...arguments])
+    }
+    return [this.parentNode]
+  }
+  return upwardsSelect
 }
