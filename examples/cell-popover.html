@@ -30,8 +30,8 @@
 
   const rows = _.range(1, 50).map(faker.Helpers.createCard)
       , popover = gridComponents.createCellPopover()
-            .on('open', onOpenPopover)
-            .on('close', () => console.log('popover closed'))
+            .on('open', onPopoverOpen)
+            .on('close', onPopoverClose)
       , table = grid.createGrid()
             .columns(
               [
@@ -49,6 +49,7 @@
                   , components: [popover]
                   , label: 'Button'
                 }
+              , { key: 'name', width: 200 }
               , { key: 'email' }
               , { key: 'phone' }
               ]
@@ -58,11 +59,15 @@
             .datum(rows)
             .call(table)
 
-  function onOpenPopover(d) {
+  function onPopoverOpen(d) {
+    console.log('popover opened')
     d3.select(this)
         .classed('fancy-popover', true)
       .append('p')
         .text(`I am ${d.row.name}`)
+  }
+  function onPopoverClose(d) {
+    console.log('popover closed', this, d3.select(this).html())
   }
 
 </script>
