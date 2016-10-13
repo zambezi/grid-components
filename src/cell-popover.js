@@ -5,7 +5,7 @@ import './cell-popover.css'
 
 export function createCellPopover() {
 
-  const eventType = uniqueId('click.cell-popover-')
+  const clickCloseEventName = uniqueId('click.cell-popover-close-')
 
   function cellPopover(d, i) {
     select(this)
@@ -18,8 +18,8 @@ export function createCellPopover() {
 
   function createPopover(d) {
 
-    const target = event.target
-        , { top, left, width, height } = target.getBoundingClientRect()
+    const button = event.target
+        , { top, left, width, height } = button.getBoundingClientRect()
         , popover = select(document.body)
             .select(appendIfMissing('div.zambezi-cell-popover'))
               .style('top', `${Math.floor(top + height / 2)}px`)
@@ -27,10 +27,15 @@ export function createCellPopover() {
               .classed('is-open', true)
               .text(`Je suis ${d.row.name}!`)
 
-    select('.info-box pre').text(`Created popover for ${d.row.name}
-Cell bounding rect is
-${JSON.stringify({ top, left })}`)
+    select('.info-box pre').text(`Created popover for ${d.row.name}`)
+    select(document.body).on(clickCloseEventName, onClose)
 
-    select(document.body).on(eventType, () => console.log(`${eventType}!`))
+    function onClose() {
+      const target = event.target
+      if (popover.node().contains(target)) return
+      if (button.contains(target)) return
+      event.stopPropagation()
+      popover.remove()
+    }
   }
 }
