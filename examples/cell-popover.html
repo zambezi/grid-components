@@ -3,6 +3,14 @@
   <meta charset="utf-8" />
   <style>
     html, body { height: 100%; }
+    .fancy-popover {
+      background: powderblue;
+      color: crimson;
+      width: 300px;
+      height: 200px;
+      padding: 30px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -51,8 +59,10 @@
             .call(table)
 
   function onOpenPopover(d) {
-    console.log(this, d)
-    d3.select(this).append('p').text(d.row.name)
+    d3.select(this)
+        .classed('fancy-popover', true)
+      .append('p')
+        .text(`I am ${d.row.name}`)
   }
 
 </script>

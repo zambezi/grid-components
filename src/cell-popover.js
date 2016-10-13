@@ -28,24 +28,26 @@ export function createCellPopover() {
               .html('')
               .style('top', `${Math.floor(top + height / 2)}px`)
               .style('left', `${left + width}px`)
-              .classed('is-open', true)
+        , popoverContent = popover.append('div')
         , gridRoot = select(this)
             .selectAll(upwards('.zambezi-grid'))
               .on('grid-scroll.cell-popover', close)
 
     lastCreated = clickCloseEventName
 
-    dispatch.call('open', popover.node(), d)
+    dispatch.call('open', popoverContent.node(), d)
     select('.info-box pre').text(`Created popover for ${d.row.name}`)
-    body.on(clickCloseEventName, onClickClose)
+    body.on(clickCloseEventName, onClickOutside)
 
-    function onClickClose() {
+    function onClickOutside() {
       const target = event.target
       if (popover.node().contains(target)) return
       if (button.contains(target)) return
       event.stopPropagation()
       body.on(clickCloseEventName, null)
-      if (lastCreated !== clickCloseEventName) return
+      if (lastCreated !== clickCloseEventName) {
+        return dispatch.call('close', popoverContent.node())
+      }
       close()
     }
 
@@ -53,7 +55,7 @@ export function createCellPopover() {
       gridRoot.on('grid-scroll.cell-popover', null)
       body.on(clickCloseEventName, null)
       popover.remove()
-      dispatch.call('close', popover.node())
+      dispatch.call('close', popoverContent.node())
     }
   }
 }
