@@ -26,10 +26,6 @@ function createEditValue() {
     s.each(editValueEach)
   }
 
-  function editValue(s) {
-    s.each(editValueEach)
-  }
-
   editValue.keyDownHandlers = function(value) {
     if (!arguments.length) return keyDownHandlers
     keyDownHandlers = value
