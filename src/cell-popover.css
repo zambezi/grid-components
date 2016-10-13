@@ -1,0 +1,14 @@
+.zambezi-cell-popover {
+  position: absolute;
+  top: 100px;
+  left: 100px;
+  background-color: powderblue;
+  width: 500px;
+  height: 400px;
+  color: crimson;
+  display: none;
+}
+
+.zambezi-cell-popover.is-open {
+  display: block;
+}
