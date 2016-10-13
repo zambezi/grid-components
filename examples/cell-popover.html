@@ -21,13 +21,16 @@
 <script>
 
   const rows = _.range(1, 50).map(faker.Helpers.createCard)
+      , popover = gridComponents.createCellPopover()
+            .on('open', onOpenPopover)
+            .on('close', () => console.log('popover closed'))
       , table = grid.createGrid()
             .columns(
               [
                 {
                   sortable: false
                 , width: 50
-                , components: [gridComponents.createCellPopover()]
+                , components: [popover]
                 , label: 'Button'
                 }
               , { key: 'name', width: 200 }
@@ -40,6 +43,11 @@
             .style('height', '300px')
             .datum(rows)
             .call(table)
+
+  function onOpenPopover(d) {
+    console.log(this, d)
+    d3.select(this).text(d.row.name)
+  }
 
 </script>
 </body>
