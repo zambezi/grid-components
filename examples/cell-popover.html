@@ -46,7 +46,7 @@
 
   function onOpenPopover(d) {
     console.log(this, d)
-    d3.select(this).text(d.row.name)
+    d3.select(this).append('p').text(d.row.name)
   }
 
 </script>
