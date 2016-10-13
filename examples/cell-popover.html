@@ -19,7 +19,12 @@
       , table = grid.createGrid()
             .columns(
               [
-                { sortable: false, width: 50, components: [gridComponents.cellPopover], label: 'Button' }
+                {
+                  sortable: false
+                , width: 50
+                , components: [gridComponents.createCellPopover()]
+                , label: 'Button'
+                }
               , { key: 'name', width: 200 }
               , { key: 'username' }
               , { key: 'email' }
