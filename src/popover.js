@@ -13,8 +13,8 @@ export function createPopover() {
 
     const clickCloseEventName = uniqueId('click.cell-popover-close-')
         , body = select(document.body)
-        , button = this
-        , { top, left, width, height } = button.getBoundingClientRect()
+        , anchor = this
+        , { top, left, width, height } = anchor.getBoundingClientRect()
 
         , popover = body.select(appendIfMissing('div.zambezi-grid-popover'))
               .html('')
@@ -41,7 +41,7 @@ export function createPopover() {
       const target = event.target
 
       if (popover.node().contains(target)) return
-      if (button.contains(target)) return
+      if (anchor.contains(target)) return
 
       event.stopPropagation()
       removeClickOutsideHandler()
