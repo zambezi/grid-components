@@ -1,4 +1,4 @@
 export { createCellSelection } from './cell-selection'
 export { createEditCell } from './edit-cell'
 export { createEditCellValue } from './edit-cell-value'
-export { createCellPopover } from './cell-popover'
+export { createPopover } from './popover'

@@ -1,30 +1,22 @@
 import { appendIfMissing, rebind } from '@zambezi/d3-utils'
-import { select, selectAll, event } from 'd3-selection'
 import { dispatch as createDispatch } from 'd3-dispatch'
+import { select, selectAll, event } from 'd3-selection'
 import { uniqueId } from 'underscore'
-import './cell-popover.css'
 
-export function createCellPopover() {
+import './popover.css'
+export function createPopover() {
 
   const dispatch = createDispatch('open', 'close')
   let lastCreated
 
-  function cellPopover(d, i) {
-    select(this)
-      .select(appendIfMissing('button.custom-element'))
-        .text('✓')
-        .on('click.cell-popover', createPopover)
-  }
+  function popover(d, i) {
 
-  return rebind().from(dispatch, 'on')(cellPopover)
-
-  function createPopover(d) {
     const clickCloseEventName = uniqueId('click.cell-popover-close-')
         , body = select(document.body)
-        , button = event.target
+        , button = this
         , { top, left, width, height } = button.getBoundingClientRect()
         , popover = select(document.body)
-            .select(appendIfMissing('div.zambezi-cell-popover'))
+            .select(appendIfMissing('div.zambezi-grid-popover'))
               .html('')
               .style('top', `${Math.floor(top + height / 2)}px`)
               .style('left', `${left + width}px`)
@@ -58,6 +50,8 @@ export function createCellPopover() {
       dispatch.call('close', popoverContent.node())
     }
   }
+
+  return rebind().from(dispatch, 'on')(popover)
 }
 
 function upwards(selector) {

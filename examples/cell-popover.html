@@ -11,6 +11,12 @@
       padding: 30px;
       font-weight: bold;
     }
+
+    .zambezi-grid-cell .formatted-text.manual-popover-button {
+      width: 100%;
+      top: 0;
+      outline: powderblue;
+    }
   </style>
 </head>
 <body>
@@ -29,25 +35,23 @@
 <script>
 
   const rows = _.range(1, 50).map(faker.Helpers.createCard)
-      , popover = gridComponents.createCellPopover()
+
+      , popover = gridComponents.createPopover() //.on('open', o).on('close', c)
             .on('open', onPopoverOpen)
             .on('close', onPopoverClose)
+
       , table = grid.createGrid()
             .columns(
               [
-                {
-                  sortable: false
-                , width: 50
-                , components: [popover]
-                , label: 'Button'
-                }
-              , { key: 'name', width: 200 }
+                { key: 'name', width: 200 }
               , { key: 'username' }
               , {
                   sortable: false
-                  , width: 50
-                  , components: [popover]
-                  , label: 'Button'
+                , width: 140
+                , key: 'username'
+                , template: '<span><button class="manual-popover-button formatted-text"></button></span>'
+                , components: [ configureButton, grid.updateTextIfChanged ]
+                , label: 'Button'
                 }
               , { key: 'name', width: 200 }
               , { key: 'email' }
@@ -58,6 +62,12 @@
             .style('height', '300px')
             .datum(rows)
             .call(table)
+
+  function configureButton() {
+    d3.select(this)
+      .select('.manual-popover-button')
+        .on('click', popover)
+  }
 
   function onPopoverOpen(d) {
     console.log('popover opened')
