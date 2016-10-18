@@ -14,12 +14,9 @@ export function createPopover() {
     const clickCloseEventName = uniqueId('click.cell-popover-close-')
         , body = select(document.body)
         , anchor = this
-        , { top, left, width, height } = anchor.getBoundingClientRect()
 
         , popover = body.select(appendIfMissing('div.zambezi-grid-popover'))
               .html('')
-              .style('top', `${Math.floor(top + height / 2)}px`)
-              .style('left', `${left + width}px`)
 
         , popoverContent = popover.append('div')
               .on('popover-close.cleanup', removeClickOutsideHandler)
@@ -33,8 +30,25 @@ export function createPopover() {
     body.on(clickCloseEventName, onClickOutside)
     dispatch.call('open', popoverContent.node(), d)
 
+    popover.each(smartPosition)
+
     function removeClickOutsideHandler() {
       body.on(clickCloseEventName, null)
+    }
+
+    function smartPosition(d) {
+
+      const target = select(this)
+          , anchorRect = anchor.getBoundingClientRect()
+          , popupRect = this.getBoundingClientRect()
+          , bodyRect = document.body.getBoundingClientRect()
+
+          , feelsRight = (anchorRect.left + anchorRect.width + popupRect.width) <= bodyRect.width
+          , feelsBottom = (anchorRect.top + popupRect.height) <= bodyRect.height
+          , left = feelsRight ? anchorRect.left + anchorRect.width : anchorRect.left - popupRect.width
+          , top = feelsBottom ? anchorRect.top : (anchorRect.top + anchorRect.height) - popupRect.height
+
+      target.style('left', `${ left }px`).style('top', `${ top }px`)
     }
 
     function onClickOutside() {
