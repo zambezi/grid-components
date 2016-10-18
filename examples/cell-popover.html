@@ -70,12 +70,22 @@
   }
 
   function onPopoverOpen(d) {
-    console.log('popover opened')
-    d3.select(this)
-        .classed('fancy-popover', true)
-      .append('p')
-        .text(`I am ${d.row.name}`)
+    const target = d3.select(this)
+              .classed('fancy-popover', true)
+
+        , p = target.append('p')
+              .text(`I am ${d.row.name}`)
+
+        , x = target.append('i')
+              .text('×')
+              .on('click', onClose)
+              .style('cursor', 'pointer')
+
+      function onClose() {
+        d3.select(this).dispatch('popover-close', { bubbles: true })
+      }
   }
+
   function onPopoverClose(d) {
     console.log('popover closed', this, d3.select(this).html())
   }

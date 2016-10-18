@@ -15,31 +15,42 @@ export function createPopover() {
         , body = select(document.body)
         , button = this
         , { top, left, width, height } = button.getBoundingClientRect()
-        , popover = select(document.body)
-            .select(appendIfMissing('div.zambezi-grid-popover'))
+
+        , popover = body.select(appendIfMissing('div.zambezi-grid-popover'))
               .html('')
               .style('top', `${Math.floor(top + height / 2)}px`)
               .style('left', `${left + width}px`)
+
         , popoverContent = popover.append('div')
+              .on('popover-close.cleanup', removeClickOutsideHandler)
+              .on('popover-close.close', close)
+
         , gridRoot = select(this)
             .selectAll(upwards('.zambezi-grid'))
               .on('grid-scroll.cell-popover', close)
 
     lastCreated = clickCloseEventName
-
-    dispatch.call('open', popoverContent.node(), d)
-    select('.info-box pre').text(`Created popover for ${d.row.name}`)
     body.on(clickCloseEventName, onClickOutside)
+    dispatch.call('open', popoverContent.node(), d)
+
+    function removeClickOutsideHandler() {
+      body.on(clickCloseEventName, null)
+    }
 
     function onClickOutside() {
       const target = event.target
+
       if (popover.node().contains(target)) return
       if (button.contains(target)) return
+
       event.stopPropagation()
-      body.on(clickCloseEventName, null)
+      removeClickOutsideHandler()
+
       if (lastCreated !== clickCloseEventName) {
-        return dispatch.call('close', popoverContent.node())
+        dispatch.call('close', popoverContent.node())
+        return
       }
+
       close()
     }
 
