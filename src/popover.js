@@ -43,12 +43,18 @@ export function createPopover() {
           , popupRect = this.getBoundingClientRect()
           , bodyRect = document.body.getBoundingClientRect()
 
-          , feelsRight = (anchorRect.left + anchorRect.width + popupRect.width) <= bodyRect.width
-          , feelsBottom = (anchorRect.top + popupRect.height) <= bodyRect.height
-          , left = feelsRight ? anchorRect.left + anchorRect.width : anchorRect.left - popupRect.width
-          , top = feelsBottom ? anchorRect.top : (anchorRect.top + anchorRect.height) - popupRect.height
+          , fitsRight = (anchorRect.left + anchorRect.width + popupRect.width) <= bodyRect.width
+          , fitsBottom = (anchorRect.top + popupRect.height) <= bodyRect.height
+          , left = fitsRight ? anchorRect.left + anchorRect.width : anchorRect.left - popupRect.width
+          , top = fitsBottom ? anchorRect.top : (anchorRect.top + anchorRect.height) - popupRect.height
 
-      target.style('left', `${ left }px`).style('top', `${ top }px`)
+      target
+          .style('left', `${ Math.max(left, 0) }px`)
+          .style('top', `${ Math.max(top, 0) }px`)
+          .classed('is-right', fitsRight)
+          .classed('is-left', !fitsRight)
+          .classed('is-below', fitsBottom)
+          .classed('is-above', !fitsBottom)
     }
 
     function onClickOutside() {
