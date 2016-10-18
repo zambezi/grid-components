@@ -59,7 +59,7 @@
 
   const rows = _.range(1, 50).map(faker.Helpers.createCard)
 
-      , popover = gridComponents.createPopover() //.on('open', o).on('close', c)
+      , popover = gridComponents.createPopover()
             .on('open', onPopoverOpen)
             .on('close', onPopoverClose)
 
@@ -81,6 +81,7 @@
               , { key: 'phone' }
               ]
             )
+
       , target = d3.select('.grid-target')
             .style('height', '300px')
             .datum(rows)
@@ -104,9 +105,10 @@
               .on('click', onClose)
               .style('cursor', 'pointer')
 
-      function onClose() {
-        d3.select(this).dispatch('popover-close', { bubbles: true })
-      }
+  }
+
+  function onClose() {
+    d3.select(this).dispatch('popover-close', { bubbles: true })
   }
 
   function onPopoverClose(d) {
