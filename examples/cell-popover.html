@@ -1,0 +1,119 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    html, body { height: 100%; }
+    .fancy-popover {
+      background: powderblue;
+      color: crimson;
+      width: 300px;
+      height: 200px;
+      padding: 30px;
+      font-weight: bold;
+    }
+
+    .is-right .fancy-popover {
+      margin-left: 5px;
+      border-left: 4px dashed crimson;
+    }
+
+
+    .is-left .fancy-popover {
+      margin-right: 5px;
+      border-right: 4px dashed crimson;
+    }
+
+
+    .is-above .fancy-popover {
+      margin-bottom: 5px;
+      border-bottom: 4px dashed crimson;
+    }
+
+
+    .is-below .fancy-popover {
+      margin-top: 5px;
+      border-top: 4px dashed crimson;
+    }
+
+    .zambezi-grid-cell .formatted-text.manual-popover-button {
+      width: 100%;
+      top: 0;
+      outline: powderblue;
+    }
+  </style>
+</head>
+<body>
+
+<div class="grid-target"></div>
+<div class="info-box"><pre>Click a button on the leftmost column</pre></div>
+
+<link rel="stylesheet" type="text/css" href="../node_modules/normalize.css/normalize.css">
+<script src="../node_modules/underscore/underscore.js"></script>
+<script src="../node_modules/d3/build/d3.js"></script>
+<script src="../node_modules/@zambezi/d3-utils/dist/d3-utils.js"></script>
+<script src="../node_modules/@zambezi/fun/dist/fun.js"></script>
+<script src="../node_modules/faker/faker.js"></script>
+<script src="../node_modules/@zambezi/grid/dist/grid.js"></script>
+<script src="../dist/grid-components.js"></script>
+<script>
+
+  const rows = _.range(1, 50).map(faker.Helpers.createCard)
+
+      , popover = gridComponents.createPopover()
+            .on('open', onPopoverOpen)
+            .on('close', onPopoverClose)
+
+      , table = grid.createGrid()
+            .columns(
+              [
+                { key: 'name', width: 200 }
+              , { key: 'username' }
+              , {
+                  sortable: false
+                , width: 140
+                , key: 'username'
+                , template: '<span><button class="manual-popover-button formatted-text"></button></span>'
+                , components: [ configureButton, grid.updateTextIfChanged ]
+                , label: 'Button'
+                }
+              , { key: 'name', width: 200 }
+              , { key: 'email' }
+              , { key: 'phone' }
+              ]
+            )
+
+      , target = d3.select('.grid-target')
+            .style('height', '300px')
+            .datum(rows)
+            .call(table)
+
+  function configureButton() {
+    d3.select(this)
+      .select('.manual-popover-button')
+        .on('click', popover)
+  }
+
+  function onPopoverOpen(d) {
+    const target = d3.select(this)
+              .classed('fancy-popover', true)
+
+        , p = target.append('p')
+              .text(`I am ${d.row.name}`)
+
+        , x = target.append('i')
+              .text('×')
+              .on('click', onClose)
+              .style('cursor', 'pointer')
+
+  }
+
+  function onClose() {
+    d3.select(this).dispatch('popover-close', { bubbles: true })
+  }
+
+  function onPopoverClose(d) {
+    console.log('popover closed', this, d3.select(this).html())
+  }
+
+</script>
+</body>

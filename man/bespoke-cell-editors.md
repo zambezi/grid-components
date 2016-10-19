@@ -1,4 +1,4 @@
-## bespoke cell editors
+## Bespoke cell editors
 
 You can create your own bespoke cell editors with the low-level `edit cell` component wrapper.
 The provided [edit cell value] component, for example, uses the `edit cell` component under the hood.
