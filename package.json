@@ -13,7 +13,8 @@
     "watch": "rollup -c -w",
     "test": "mocha",
     "pretest": "npm run clean && npm run build",
-    "prepublish": "npm test"
+    "prepublish": "npm test",
+    "start": "npm run watch"
   },
   "license": "MIT",
   "main": "dist/grid-components.js",
@@ -32,9 +33,10 @@
     "mocha": "2.5.3",
     "normalize.css": "4.2.0",
     "rimraf": "2.5.3",
-    "rollup": "0.26.3",
+    "rollup": "0.34.10",
     "rollup-plugin-babel": "2.3.9",
-    "rollup-plugin-postcss": "0.1.1"
+    "rollup-plugin-postcss": "0.1.1",
+    "rollup-watch": "^2.5.0"
   },
   "dependencies": {
     "@zambezi/grid": "^0.9.0",
