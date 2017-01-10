@@ -8,6 +8,7 @@
 
 - Grid components
   - [Cell selection](man/cell-selection.md)
+  - [Run header components](man/run-header-components.md)
 
 - Column specific components
   - [Edit cell value](man/edit-cell-value.md)
