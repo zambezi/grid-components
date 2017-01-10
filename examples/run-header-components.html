@@ -1,6 +1,19 @@
 <!doctype html>
 <head><meta charset="utf-8" /></head>
 <body>
+<style>
+  button.fancy {
+    background-color: yellow;
+    display: block;
+    position: absolute;
+    right: 14px;
+    top: 4px;
+    border: 1px dotted #888;
+    color: white;
+    background: black;
+  }
+
+</style>
 <h1>Run header components</h1>
 
 <div class="grid-target"></div>
@@ -17,7 +30,12 @@
   var table = grid.createGrid()
           .columns(
             [
-              { key: 'name', locked: 'left', width: 200 }
+              { 
+                key: 'name'
+              , locked: 'left'
+              , width: 200 
+              , headerComponents: [ fancyButton ] 
+              }
             , {
                 key: 'username', headerComponents: [ ]
               , headerComponents: [ colorPretty ]
@@ -25,7 +43,7 @@
             , { key: 'email', sortDescending: true }
             , {
                 key: 'phone'
-              , headerComponents: [ colorPretty ]
+              , headerComponents: [ colorPretty, fancyButton ]
               }
             ]
           )
@@ -44,6 +62,13 @@
     d3.select(this)
         .style('background-color', color(d.id))
         .style('color', color(d.id + ':text'))
+  }
+
+  function fancyButton(d, i) {
+    const append = d3Utils.appendIfMissing('button.fancy')
+    d3.select(this).select(append).text(d.id)
+      .on('click.log', d => alert(`YEP ${d.id}!`))
+      .on('click.swallow', () => d3.event.stopPropagation() )
   }
 
 </script>
