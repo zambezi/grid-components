@@ -45,6 +45,8 @@
                   gridComponents.createEditCellValue()
                       .on('change', onUsernameChange)
                       .on('validationerror', console.error.bind(console, 'VALIDATION'))
+                      .on('editstart', d => console.debug('edit start',  d))
+                      .on('editend', d => console.debug('edit end', d))
                       .characterClass('A-Za-z0-5')
                       .validate(validateUserName)
                       .editable(isNotZack)

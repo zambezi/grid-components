@@ -1,4 +1,5 @@
 import { appendIfMissing, rebind } from '@zambezi/d3-utils'
+import { debounce, compose } from 'underscore'
 import { dispatch as createDispatch } from 'd3-dispatch'
 import { select, event } from 'd3-selection'
 import { unwrap } from '@zambezi/grid'
@@ -10,7 +11,7 @@ const append = appendIfMissing('span.edit-cell-input')
 export function createEditCell() {
 
   const rowToTemp = new WeakMap()
-      , dispatch = createDispatch('change', 'validationerror')
+      , dispatch = createDispatch('change', 'validationerror', 'editstart', 'editend')
       , api = rebind().from(dispatch, 'on')
 
   let gesture = 'dblclick'
@@ -29,11 +30,11 @@ export function createEditCell() {
     target.each(draw)
 
     function draw(d, i) {
-
       const isEditable = editable.call(this, d, i)
           , row = unwrap(d.row)
           , temp = rowToTemp.get(row)
           , cell = select(this)
+          , notifyEditEndDebounced = debounce(notifyEditEnd, 0)
 
       if (isEditable && temp && temp.value !== undefined) {
 
@@ -43,8 +44,9 @@ export function createEditCell() {
         component
             .on('partialedit.cache', cacheTemp)
             .on('cancel.clear', removeTmp)
+            .on('cancel.notify', notifyEditEndDebounced)
             .on('cancel.redraw', () => select(this).dispatch('redraw', { bubbles: true }) )
-            .on('commit.clear', onCommit)
+            .on('commit.process', compose(notifyEditEndDebounced, validateChange))
             .on('commit.redraw', () => select(this).dispatch('redraw', { bubbles: true }) )
 
         cell.select(append)
@@ -53,7 +55,6 @@ export function createEditCell() {
       } else {
         cell.classed('is-editing', false).select('.edit-cell-input').remove()
       }
-
     }
 
     function startEdit(d, i) {
@@ -63,6 +64,9 @@ export function createEditCell() {
       if (isAlreadyEditing) return
 
       rowToTemp.set(unwrappedRow, {value: d.value, valid: true})
+
+      dispatch.call('editstart', this, unwrappedRow)
+
       select(this)
           .classed('is-editing', true)
           .dispatch('redraw', { bubbles: true })
@@ -76,15 +80,24 @@ export function createEditCell() {
       rowToTemp.delete(unwrap(d.row))
     }
 
-    function onCommit(d) {
-      const reason = validate.call(this, d, this.value)
+    function notifyEditEnd(d) {
+      if (!d) return
+      dispatch.call('editend', this, unwrap(d))
+    }
 
-      if (!reason)  {
+    function validateChange(d) {
+      const unwrappedRow = unwrap(d.row)
+          , reason = validate.call(this, d, this.value)
+          , isValid = !reason
+
+      if (isValid)  {
         removeTmp(d)
-        dispatch.call('change', this, unwrap(d.row), this.value)
+        dispatch.call('change', this, unwrappedRow, this.value)
+        return d
       } else {
-        rowToTemp.set(unwrap(d.row), { value: this.value, valid: false })
+        rowToTemp.set(unwrappedRow, { value: this.value, valid: false })
         dispatch.call('validationerror', this, reason)
+        return null
       }
     }
   }
