@@ -27,27 +27,27 @@
 <script src="../dist/grid-components.js"></script>
 <script>
 
-  var table = grid.createGrid()
-          .columns(
-            [
-              { 
-                key: 'name'
-              , locked: 'left'
-              , width: 200 
-              , headerComponents: [ fancyButton ] 
-              }
-            , {
-                key: 'username', headerComponents: [ ]
-              , headerComponents: [ colorPretty ]
-              }
-            , { key: 'email', sortDescending: true }
-            , {
-                key: 'phone'
-              , headerComponents: [ colorPretty, fancyButton ]
-              }
-            ]
-          )
-          .use(gridComponents.createRunHeaderComponents())
+  const table = grid.createGrid()
+            .columns(
+              [
+                { 
+                  key: 'name'
+                , locked: 'left'
+                , width: 200 
+                , headerComponents: [ fancyButton ] 
+                }
+              , {
+                  key: 'username', headerComponents: [ ]
+                , headerComponents: [ colorPretty ]
+                }
+              , { key: 'email', sortDescending: true }
+              , {
+                  key: 'phone'
+                , headerComponents: [ colorPretty, fancyButton ]
+                }
+              ]
+            )
+            .use(gridComponents.createRunHeaderComponents())
 
     , rows = _.range(1, 2000).map(faker.Helpers.createCard)
     , color = d3.scaleOrdinal().range(d3.schemeCategory10)
