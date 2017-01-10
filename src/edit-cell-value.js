@@ -35,6 +35,8 @@ function createEditValue() {
   return api(editValue)
 
   function editValueEach(d, i) {
+    let isCancelled
+      , isCommited
 
     const input = select(this)
             .select(appendInput)
@@ -48,14 +50,26 @@ function createEditValue() {
                     null
                   , keyDownHandlers.concat(
                       [
-                        keyCodeHandler((d) => dispatch.call('commit', input.node(), d), 13)
-                      , keyCodeHandler((d) => dispatch.call('cancel', input.node(), d), 27)
+                        keyCodeHandler(onCancel, 27)
+                      , keyCodeHandler(onCommit, 13)
                       ]
                     )
                 )
               )
-              .on('blur.process', (d) => dispatch.call('commit', input.node(), d))
+              .on('blur.process', onCommit)
 
     if (d.isValidInput) input.node().focus()
+
+    function onCommit(d) {
+      if (isCancelled) return
+      if (isCommited) return
+      isCommited = true
+      dispatch.call('commit', input.node(), d)
+    }
+
+    function onCancel(d) {
+      isCancelled = true
+      dispatch.call('cancel', input.node(), d)
+    }
   }
 }
