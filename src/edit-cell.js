@@ -30,7 +30,6 @@ export function createEditCell() {
     target.each(draw)
 
     function draw(d, i) {
-
       const isEditable = editable.call(this, d, i)
           , row = unwrap(d.row)
           , temp = rowToTemp.get(row)
