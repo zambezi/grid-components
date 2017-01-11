@@ -10,7 +10,11 @@ import './cell-selection.css'
 
 export function createCellSelection() {
 
-  const dispatch = createDispatch('cell-selected-change', 'cell-active-action')
+  const dispatch = createDispatch(
+          'cell-selected-change'
+        , 'cell-active-action'
+        , 'cell-active-change'
+        )
 
   let gesture = 'click'
     , selected = []
@@ -75,7 +79,7 @@ export function createCellSelection() {
           , currentColumnIndex = columns.indexOf(column)
           , newColumn = columns[modulo(currentColumnIndex + step, columns.length)]
 
-      active = { row, column: newColumn }
+      setActive({ row, column: newColumn })
       target.dispatch('redraw', { bubbles: true })
     }
 
@@ -85,7 +89,7 @@ export function createCellSelection() {
           , currentRowIndex = findIndex(rows, r => unwrap(r) === row)
           , newRow = rows[modulo(currentRowIndex + step, rows.length)]
 
-      active = { row: newRow, column }
+      setActive({ row: newRow, column })
       target.dispatch('redraw', { bubbles: true })
     }
 
@@ -95,7 +99,7 @@ export function createCellSelection() {
       if (active) return
       if (!bundle.length) return
       if (!columns.length) return
-      active = { row: bundle[0], column: columns[0] }
+      setActive({ row: bundle[0], column: columns[0] })
       select(this).dispatch('redraw', { bubbles: true })
     }
 
@@ -162,11 +166,16 @@ export function createCellSelection() {
           selectOnly(target)
       }
 
-      active = target
+      setActive(target)
       selected = compileSelected()
 
       dispatch.call('cell-selected-change', this, selected, active)
       select(this).dispatch('redraw', { bubbles: true })
+    }
+
+    function setActive(newActive) {
+      active = newActive
+      dispatch.call('cell-active-change', this, active)
     }
 
     function setSelectionToRange(a, b) {

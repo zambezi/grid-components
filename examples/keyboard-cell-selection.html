@@ -32,6 +32,7 @@
             'cell-active-action'
           , ({row, column}) => console.log('cell active action', row, column)
           )
+          .on('cell-active-change', active => console.log('active cell change', active))
 
     , table = grid.createGrid()
           .columns(
