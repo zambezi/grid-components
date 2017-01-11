@@ -50,9 +50,13 @@ function createEditValue() {
                     null
                   , keyDownHandlers.concat(
                       [
-                        keyCodeHandler(() => event.stopPropagation(), 9)  // Tab
-                      , keyCodeHandler(onCancel, 27)                      // Esc
-                      , keyCodeHandler(onEnter, 13)                       // Enter
+                        keyCodeHandler(onCancel, 27) // esc
+                      , keyCodeHandler(onEnter, 13)  // enter
+                      , keyCodeHandler(onCommit, 9)  // tab
+                      , keyCodeHandler(onCommit, 38) // up
+                      , keyCodeHandler(onCommit, 40) // down
+                      , keyCodeHandler(onCommit, 37) // left
+                      , keyCodeHandler(onCommit, 39) // right
                       ]
                     )
                 )
