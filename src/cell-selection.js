@@ -65,15 +65,14 @@ export function createCellSelection() {
     function setupKeyboardNavEvents() {
       target.attr('tabindex', '0')
           .on('focus', debounce(setActiveIfNone, 200))
-          .on('blur', d => console.log('on blur'))
           .on(
             'keydown.keyboard-cell-selection'
           , some(
               keyCodeHandler(() => dispatch.call('cell-active-action', this, active), 13) // enter
-            , keyCodeHandler(() => moveHorizontal(-1), 37)  // left
-            , keyCodeHandler(() => moveHorizontal(1), 39)   // right
             , keyCodeHandler(d => moveVertical(-1, d.rows), 38) // up
             , keyCodeHandler(d => moveVertical(1, d.rows), 40)  // down
+            , keyCodeHandler(() => moveHorizontal(-1), 37)      // left
+            , keyCodeHandler(() => moveHorizontal(1), 39)       // right
             , keyCodeHandler(onTab, 9)
             )
           )

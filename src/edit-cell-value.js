@@ -1,7 +1,7 @@
 import { appendIfMissing, rebind, keyCodeHandler, createCharacterClassValidator } from '@zambezi/d3-utils'
 import { createEditCell } from './edit-cell'
 import { dispatch as createDispatch } from 'd3-dispatch'
-import { select } from 'd3-selection'
+import { select, event } from 'd3-selection'
 import { someResult as some } from '@zambezi/fun'
 
 const appendInput = appendIfMissing('input.edit-value')
@@ -50,8 +50,9 @@ function createEditValue() {
                     null
                   , keyDownHandlers.concat(
                       [
-                        keyCodeHandler(onCancel, 27)
-                      , keyCodeHandler(onCommit, 13)
+                        keyCodeHandler(() => event.stopPropagation(), 9)  // Tab
+                      , keyCodeHandler(onCancel, 27)                      // Esc
+                      , keyCodeHandler(onEnter, 13)                       // Enter
                       ]
                     )
                 )
@@ -59,6 +60,12 @@ function createEditValue() {
               .on('blur.process', onCommit)
 
     if (d.isValidInput) input.node().focus()
+
+    function onEnter(d) {
+      console.log('onEnter', d)
+      event.stopPropagation()
+      onCommit.call(this, d)
+    }
 
     function onCommit(d) {
       if (isCancelled) return

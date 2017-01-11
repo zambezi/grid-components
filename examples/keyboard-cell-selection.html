@@ -22,60 +22,67 @@
 <script src="../dist/grid-components.js"></script>
 <script>
 
-  var rows = _.range(1, 5).map(faker.Helpers.createCard)
-    , cells = gridComponents.createCellSelection()
-          .on(
-            'cell-selected-change.log'
-          , (selected, active) => console.log(horribleBanner(selected, active))
-          )
-          .on(
-            'cell-active-action'
-          , ({row, column}) => console.log('cell active action', row, column)
-          )
-          .on('cell-active-change', active => console.log('active cell change', active))
+  const rows = _.range(1, 15).map(faker.Helpers.createCard)
+      , cellSelection = gridComponents.createCellSelection()
+            .on(
+              'cell-selected-change.log'
+            , (selected, active) => console.log(horribleBanner(selected, active))
+            )
+            .on('cell-active-action.edit', (cell) => editUsername.startEdit(cell))
 
-    , table = grid.createGrid()
-          .columns(
-            [
-              { key: 'name', locked: 'left', width: 200 }
-            , { key: 'username' }
-            , { key: 'email' }
-            , {
-                label: 'some synthetic column'
-              , format: summary
-              , sort: (a, b) => d3.ascending(a.name, b.name)
-              }
-            , { key: 'phone' }
-            ]
-          )
-          .usePre(cells)
-          .on('draw.log', onDraw)
+      , editUsername = gridComponents.createEditCellValue()
+                        .on(
+                          'change'
+                        , (row, value) => row.username = value.split('').reverse().join('')
+                        )
+                        .editable(isNotASomething)
+                        .on('editend', () => target.node().focus())
 
-    , output = d3.select('#output')
-    , target = d3.select('.grid-target')
-          .style('height', '300px')
-          .datum(rows)
-          .call(table)
+      , table = grid.createGrid()
+            .columns(
+              [
+                { key: 'name', locked: 'left', width: 200 }
+              , {
+                  key: 'username'
+                , components: [ editUsername, grid.updateTextIfChanged ]
+                }
+              , { key: 'email' }
+              , {
+                  label: 'some synthetic column'
+                , format: summary
+                , sort: (a, b) => d3.ascending(a.name, b.name)
+                }
+              , { key: 'phone' }
+              ]
+            )
+            .usePre(cellSelection)
+            .on('draw.log', onDraw)
+
+      , output = d3.select('#output')
+      , target = d3.select('.grid-target')
+            .style('height', '300px')
+            .datum(rows)
+            .call(table)
 
   d3.select('#clear-selection')
-      .on('click.reset', () => cells.selected([]).active(null))
+      .on('click.reset', () => cellSelection.selected([]).active(null))
       .on('click.redraw', () => target.call(table))
 
   d3.select('#programmatic-select')
       .on('click.clear', () => console.clear())
-      .on('click.reset', () => cells.selected(bunchOfCells()))
+      .on('click.reset', () => cellSelection.selected(bunchOfCells()))
       .on('click.redraw', () => target.call(table))
 
   d3.select('#programmatic-select-by-indices')
       .on('click.clear', () => console.clear())
       .on(
         'click.reset'
-      , () => cells.selected([ { row: 1, column: 'username' }, { row: 2, column: 'email'} ])
+      , () => cellSelection.selected([ { row: 1, column: 'username' }, { row: 2, column: 'email'} ])
       )
       .on('click.redraw', () => target.call(table))
 
   function onDraw() {
-    output.text(horribleBanner(cells.selected(), cells.active()))
+    output.text(horribleBanner(cellSelection.selected(), cellSelection.active()))
   }
 
   function horribleBanner(selected, active) {
@@ -101,6 +108,10 @@
 
   function summary(row) {
     return `${row.username.slice(0, 3)} -- ${row.address.city}`
+  }
+
+  function isNotASomething(cell) {
+    return cell.row.username.toLowerCase().indexOf('a') !== 0
   }
 
 </script>

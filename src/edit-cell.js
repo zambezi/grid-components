@@ -13,6 +13,7 @@ export function createEditCell() {
   const rowToTemp = new WeakMap()
       , dispatch = createDispatch('change', 'validationerror', 'editstart', 'editend')
       , api = rebind().from(dispatch, 'on')
+      , internalDispatch = createDispatch('external-edit-request')
 
   let gesture = 'dblclick'
     , component
@@ -21,22 +22,45 @@ export function createEditCell() {
 
   function editCellEach(d, i) {
 
-    const isEditable = editable.call(this, d, i) // HHA
-        , target = select(this)
-              .classed('editable-cell', isEditable)
-              .on('click.quiet', isEditable ? () => event.stopPropagation() : null)
-              .on(gesture + '.start', isEditable ? startEdit : null)
+    const isEditable = editable.call(this, d, i) 
+        , row = unwrap(d.row)
+        , column = d.column
+        , temp = rowToTemp.get(row)
+        , cellTarget = select(this)
+        , rowNumber = d.row.freeRowNumber
 
-    target.each(draw)
+    cellTarget.classed('editable-cell', isEditable)
+        .on('click.quiet', isEditable ? () => event.stopPropagation() : null)
+        .on(gesture + '.start', isEditable ? startEdit : null)
 
-    function draw(d, i) {
-      const isEditable = editable.call(this, d, i)
-          , row = unwrap(d.row)
-          , temp = rowToTemp.get(row)
-          , cell = select(this)
+    internalDispatch.on(`external-edit-request.${column.id}`, startExternalEdit)
+    draw()
+
+    function startExternalEdit(cell, initValue) {
+
+      const eventColumn = cell.column
+          , eventRow = cell.row
+          , isTargetRowEditable = editable.call(this, cell)
+
+      if (eventColumn.id !== column.id) {
+        console.log('not for my column')
+        return
+      }
+
+      if (!isTargetRowEditable) {
+        console.log('not editable')
+        return
+      }
+
+      console.log('start external edit', cell, column, this)
+      startEdit(cell)
+    }
+
+    function draw() {
+
+      console.log('edit cell draw!')
 
       if (isEditable && temp) {
-
         d.tempInput = temp.value
         d.isValidInput = !!temp.valid
 
@@ -44,35 +68,21 @@ export function createEditCell() {
             .on('partialedit.cache', cacheTemp)
             .on('cancel.clear', removeTmp)
             .on('cancel.notify', notifyEditEnd)
-            .on('cancel.redraw', () => select(this).dispatch('redraw', { bubbles: true }) )
             .on('commit.process', compose(notifyEditEnd, validateChange))
-            .on('commit.redraw', () => select(this).dispatch('redraw', { bubbles: true }) )
+            .on('commit.redraw', () => cellTarget.dispatch('redraw', { bubbles: true }) )
 
-        cell.select(append)
+        cellTarget.classed('is-editing', true)
+            .select(append)
             .call(component)
 
       } else {
-        cell.classed('is-editing', false).select('.edit-cell-input').remove()
+        cellTarget.classed('is-editing', false).select('.edit-cell-input').remove()
       }
     }
 
-    function startEdit(d, i) {
-      const unwrappedRow = unwrap(d.row)
-          , isAlreadyEditing = (rowToTemp.get(unwrappedRow) !== undefined)
-
-      if (isAlreadyEditing) return
-
-      rowToTemp.set(unwrappedRow, {value: d.value, valid: true})
-
-      dispatch.call('editstart', this, unwrappedRow)
-
-      select(this)
-          .classed('is-editing', true)
-          .dispatch('redraw', { bubbles: true })
-    }
 
     function cacheTemp(d) {
-      rowToTemp.set(unwrap(d.row), {value: this.value, valid: true})
+      rowToTemp.set(unwrap(d.row), { value: this.value, valid: true })
     }
 
     function removeTmp(d) {
@@ -99,7 +109,19 @@ export function createEditCell() {
         return null
       }
     }
+
+    function startEdit(cell) {
+      const unwrappedRow = unwrap(cell.row)
+          , isAlreadyEditing = (rowToTemp.get(unwrappedRow) !== undefined)
+
+      if (isAlreadyEditing) return
+
+      rowToTemp.set(unwrappedRow, { value: cell.value, valid: true })
+      dispatch.call('editstart', this, unwrappedRow)
+      cellTarget.dispatch('redraw', { bubbles: true })
+    }
   }
+
 
   editCellEach.component = function(value) {
     if (!arguments.length) return component
@@ -122,6 +144,11 @@ export function createEditCell() {
   editCellEach.gesture = function(value) {
     if (!arguments.length) return gesture
     gesture = value
+    return editCellEach
+  }
+
+  editCellEach.startEdit = function(cell, initValue) {
+    internalDispatch.call('external-edit-request', this, cell, initValue)
     return editCellEach
   }
 
