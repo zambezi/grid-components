@@ -21,6 +21,7 @@ export function createCellSelection() {
     , selectedCandidates
     , selectedRowsByColumnId = {}
     , active
+    , selectable = false
 
   function cellSelection(s) {
     s.each(cellSelectionEach)
@@ -30,6 +31,12 @@ export function createCellSelection() {
     if (!arguments.length) return selected
     selected = value
     selectedCandidates = value
+    return cellSelection
+  }
+
+  cellSelection.selectable = function(value) {
+    if (!arguments.length) return selectable
+    selectable = value
     return cellSelection
   }
 
@@ -147,32 +154,34 @@ export function createCellSelection() {
           , isAlreadySelected = set && set.has(row)
           , hasActive = !!active
 
-      switch(true) {
+      setActive(target)
 
-        case ctrlKey && shiftKey && hasActive:
-          addRangeToSelection(active, target)
-          break
+      if (selectable) {
+        switch(true) {
+          case ctrlKey && shiftKey && hasActive:
+            addRangeToSelection(active, target)
+            break
 
-        case shiftKey && hasActive:
-          setSelectionToRange(active, target)
-          break
+          case shiftKey && hasActive:
+            setSelectionToRange(active, target)
+            break
 
-        case ctrlKey && isAlreadySelected:
-          removeFromSelected(target)
-          break
+          case ctrlKey && isAlreadySelected:
+            removeFromSelected(target)
+            break
 
-        case ctrlKey:
-          addToSelected(target)
-          break
+          case ctrlKey:
+            addToSelected(target)
+            break
 
-        default:
-          selectOnly(target)
+          default:
+            selectOnly(target)
+        }
+
+        selected = compileSelected()
+        dispatch.call('cell-selected-change', this, selected, active)
       }
 
-      setActive(target)
-      selected = compileSelected()
-
-      dispatch.call('cell-selected-change', this, selected, active)
       select(this).dispatch('redraw', { bubbles: true })
     }
 
