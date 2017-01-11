@@ -1,5 +1,5 @@
 import { appendIfMissing, rebind } from '@zambezi/d3-utils'
-import { compose } from 'underscore'
+import { debounce, compose } from 'underscore'
 import { dispatch as createDispatch } from 'd3-dispatch'
 import { select, event } from 'd3-selection'
 import { unwrap } from '@zambezi/grid'
@@ -34,6 +34,7 @@ export function createEditCell() {
           , row = unwrap(d.row)
           , temp = rowToTemp.get(row)
           , cell = select(this)
+          , notifyEditEndDebounced = debounce(notifyEditEnd, 0)
 
       if (isEditable && temp && temp.value !== undefined) {
 
@@ -43,9 +44,9 @@ export function createEditCell() {
         component
             .on('partialedit.cache', cacheTemp)
             .on('cancel.clear', removeTmp)
-            .on('cancel.notify', notifyEditEnd)
+            .on('cancel.notify', notifyEditEndDebounced)
             .on('cancel.redraw', () => select(this).dispatch('redraw', { bubbles: true }) )
-            .on('commit.process', compose(notifyEditEnd, validateChange))
+            .on('commit.process', compose(notifyEditEndDebounced, validateChange))
             .on('commit.redraw', () => select(this).dispatch('redraw', { bubbles: true }) )
 
         cell.select(append)
