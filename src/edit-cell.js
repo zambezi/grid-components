@@ -36,7 +36,7 @@ export function createEditCell() {
           , cell = select(this)
           , notifyEditEndDebounced = debounce(notifyEditEnd, 0)
 
-      if (isEditable && temp && temp.value !== undefined) {
+      if (isEditable && temp) {
 
         d.tempInput = temp.value
         d.isValidInput = !!temp.valid
