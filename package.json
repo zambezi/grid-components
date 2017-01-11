@@ -1,6 +1,6 @@
 {
   "name": "@zambezi/grid-components",
-  "version": "0.6.1-fix-esc-and-double-commits.1",
+  "version": "0.6.1-fix-esc-and-double-commits.2",
   "description": "Components for the Zambezi Grids",
   "keywords": [
     "d3",
