@@ -3,5 +3,9 @@
 }
 
 .zambezi-grid-cell.is-active {
+  border: 2px dotted rgba(255, 0, 255, 0.4);
+}
+
+.zambezi-grid:focus .zambezi-grid-cell.is-active {
   border: 2px dotted magenta;
 }

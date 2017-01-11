@@ -1,6 +1,6 @@
 import { dispatch  as createDispatch }  from 'd3-dispatch'
 import { rebind, forward, keyCodeHandler } from '@zambezi/d3-utils'
-import { reduce, indexBy, findIndex, range } from 'underscore'
+import { reduce, indexBy, findIndex, range, debounce } from 'underscore'
 import { select, event } from 'd3-selection'
 import { someResult as some } from '@zambezi/fun'
 import { unwrap } from '@zambezi/grid'
@@ -50,7 +50,7 @@ export function createCellSelection() {
 
     function setupKeyboardNavEvents() {
       target.attr('tabindex', '0')
-          .on('focus', onFocus)
+          .on('focus', debounce(setActiveIfNone, 200))
           .on('blur', d => console.log('on blur'))
           .on(
             'keydown.keyboard-cell-selection'
@@ -72,7 +72,12 @@ export function createCellSelection() {
     function onDown(d) { console.log('on Down', event) }
     function onTab(d) { console.log('on Tab', event); event.preventDefault() }
 
-    function onFocus() {
+    function setActiveIfNone(d) {
+      if (active) return
+      if (!bundle.length) return
+      if (!bundle.columns.length) return
+      active = { row: bundle[0], column: bundle.columns[0] }
+      select(this).dispatch('redraw', { bubbles: true })
     }
 
     function updateFromCandidates() {
