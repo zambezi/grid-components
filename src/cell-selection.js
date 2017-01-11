@@ -1,4 +1,5 @@
 import { dispatch  as createDispatch }  from 'd3-dispatch'
+import { modulo } from '@zambezi/fun'
 import { rebind, keyCodeHandler } from '@zambezi/d3-utils'
 import { reduce, indexBy, findIndex, range, debounce } from 'underscore'
 import { select, event } from 'd3-selection'
@@ -38,7 +39,8 @@ export function createCellSelection() {
 
   function cellSelectionEach(bundle, i) {
     const target = select(this)
-        , columnById = indexBy(bundle.columns, 'id')
+        , columns = bundle.columns
+        , columnById = indexBy(columns, 'id')
 
     if (selectedCandidates) updateFromCandidates()
 
@@ -55,9 +57,9 @@ export function createCellSelection() {
           .on(
             'keydown.keyboard-cell-selection'
           , some(
-              keyCodeHandler(() => dispatch.call('cell-active-action', this, active), 13)
-            , keyCodeHandler(onLeft, 37)
-            , keyCodeHandler(onRight, 39)
+              keyCodeHandler(() => dispatch.call('cell-active-action', this, active), 13) // enter
+            , keyCodeHandler(() => moveHorizontal(-1), 37)  // left
+            , keyCodeHandler(() => moveHorizontal(1), 39)   // right
             , keyCodeHandler(onUp, 38)
             , keyCodeHandler(onDown, 40)
             , keyCodeHandler(onTab, 9)
@@ -65,9 +67,15 @@ export function createCellSelection() {
           )
     }
 
-    function onEnter(d) { console.log('on enter', event) }
-    function onLeft(d) { console.log('on Left', event) }
-    function onRight(d) { console.log('on Right', event) }
+    function moveHorizontal(step) { 
+      if (!active) return
+      const { column, row } = active
+      const currentColumnIndex = columns.indexOf(column)
+      const newColumn = columns[modulo(currentColumnIndex + step, columns.length)]
+      active = { row, column: newColumn }
+      target.dispatch('redraw', { bubbles: true })
+    }
+
     function onUp(d) { console.log('on Up', event) }
     function onDown(d) { console.log('on Down', event) }
     function onTab(d) { console.log('on Tab', event); event.preventDefault() }
@@ -75,8 +83,8 @@ export function createCellSelection() {
     function setActiveIfNone(d) {
       if (active) return
       if (!bundle.length) return
-      if (!bundle.columns.length) return
-      active = { row: bundle[0], column: bundle.columns[0] }
+      if (!columns.length) return
+      active = { row: bundle[0], column: columns[0] }
       select(this).dispatch('redraw', { bubbles: true })
     }
 
@@ -160,8 +168,7 @@ export function createCellSelection() {
     }
 
     function rangeFrom(a, b) {
-      const columns = bundle.columns
-          , columnRange = rangeFromUnorderedIndices(
+      const columnRange = rangeFromUnorderedIndices(
               columns
             , columns.indexOf(a.column)
             , columns.indexOf(b.column)
