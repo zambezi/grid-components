@@ -1,7 +1,7 @@
 import { dispatch  as createDispatch }  from 'd3-dispatch'
 import { modulo } from '@zambezi/fun'
 import { rebind, keyCodeHandler } from '@zambezi/d3-utils'
-import { reduce, indexBy, findIndex, range, debounce } from 'underscore'
+import { reduce, indexBy, findIndex, range, debounce, map } from 'underscore'
 import { select, event } from 'd3-selection'
 import { someResult as some } from '@zambezi/fun'
 import { unwrap } from '@zambezi/grid'
@@ -72,8 +72,8 @@ export function createCellSelection() {
               keyCodeHandler(() => dispatch.call('cell-active-action', this, active), 13) // enter
             , keyCodeHandler(() => moveHorizontal(-1), 37)  // left
             , keyCodeHandler(() => moveHorizontal(1), 39)   // right
-            , keyCodeHandler(() => moveVertical(-1), 38)    // up
-            , keyCodeHandler(() => moveVertical(1), 40)     // down
+            , keyCodeHandler(d => moveVertical(-1, d.rows), 38) // up
+            , keyCodeHandler(d => moveVertical(1, d.rows), 40)  // down
             , keyCodeHandler(onTab, 9)
             )
           )
@@ -90,8 +90,10 @@ export function createCellSelection() {
       target.dispatch('redraw', { bubbles: true })
     }
 
-    function moveVertical(step) {
+    function moveVertical(step, rows) {
+
       if (!active) return
+
       const { column, row } = active
           , currentRowIndex = findIndex(rows, r => unwrap(r) === row)
           , newRow = rows[modulo(currentRowIndex + step, rows.length)]
@@ -185,8 +187,8 @@ export function createCellSelection() {
       select(this).dispatch('redraw', { bubbles: true })
     }
 
-    function setActive(newActive) {
-      active = newActive
+    function setActive({ row, column}) {
+      active = { row: unwrap(row), column }
       dispatch.call('cell-active-change', this, active)
     }
 
