@@ -40,6 +40,7 @@ export function createCellSelection() {
   function cellSelectionEach(bundle, i) {
     const target = select(this)
         , columns = bundle.columns
+        , rows = bundle.rows
         , columnById = indexBy(columns, 'id')
 
     if (selectedCandidates) updateFromCandidates()
@@ -60,8 +61,8 @@ export function createCellSelection() {
               keyCodeHandler(() => dispatch.call('cell-active-action', this, active), 13) // enter
             , keyCodeHandler(() => moveHorizontal(-1), 37)  // left
             , keyCodeHandler(() => moveHorizontal(1), 39)   // right
-            , keyCodeHandler(onUp, 38)
-            , keyCodeHandler(onDown, 40)
+            , keyCodeHandler(() => moveVertical(-1), 38)    // up
+            , keyCodeHandler(() => moveVertical(1), 40)     // down
             , keyCodeHandler(onTab, 9)
             )
           )
@@ -69,15 +70,25 @@ export function createCellSelection() {
 
     function moveHorizontal(step) { 
       if (!active) return
+
       const { column, row } = active
-      const currentColumnIndex = columns.indexOf(column)
-      const newColumn = columns[modulo(currentColumnIndex + step, columns.length)]
+          , currentColumnIndex = columns.indexOf(column)
+          , newColumn = columns[modulo(currentColumnIndex + step, columns.length)]
+
       active = { row, column: newColumn }
       target.dispatch('redraw', { bubbles: true })
     }
 
-    function onUp(d) { console.log('on Up', event) }
-    function onDown(d) { console.log('on Down', event) }
+    function moveVertical(step) {
+      if (!active) return
+      const { column, row } = active
+          , currentRowIndex = findIndex(rows, r => unwrap(r) === row)
+          , newRow = rows[modulo(currentRowIndex + step, rows.length)]
+
+      active = { row: newRow, column }
+      target.dispatch('redraw', { bubbles: true })
+    }
+
     function onTab(d) { console.log('on Tab', event); event.preventDefault() }
 
     function setActiveIfNone(d) {
@@ -173,7 +184,6 @@ export function createCellSelection() {
             , columns.indexOf(a.column)
             , columns.indexOf(b.column)
             )
-          , rows = bundle.rows
           , rowRange = rangeFromUnorderedIndices(
               rows
             , findIndex(rows, r => unwrap(r) == a.row)
