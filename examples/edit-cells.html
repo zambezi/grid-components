@@ -35,8 +35,8 @@
 <script src="../dist/grid-components.js"></script>
 <script>
 
-  let locked = false
-  const table = grid.createGrid()
+  const rows = _.range(1, 10).map(faker.Helpers.createCard)
+      , table = grid.createGrid()
             .columns(
               [
                 { key: 'name', locked: 'left', width: 200 }
@@ -46,12 +46,6 @@
                     gridComponents.createEditCellValue()
                         .on('change', onUsernameChange)
                         .on('validationerror', console.error.bind(console, 'VALIDATION'))
-                        .on('editstart.clear', () => console.clear())
-                        .on('editstart.lock', () => locked = true)
-                        .on('editstart.debug', d => console.debug('EDIT START',  d))
-                        .on('editend.unlock', () => locked = false)
-                        .on('editend.redraw', () => {draw(); draw(); draw()})
-                        .on('editend.debug', d => console.debug('EDIT END', d))
                         .characterClass('A-Za-z0-5')
                         .validate(validateUserName)
                         .editable(isNotZack)
@@ -63,27 +57,13 @@
               , { key: 'phone' }
               ]
             )
-            .on('draw', () => console.log('grid drawn'))
 
-      , i = setInterval(draw, 1000)
-
-  draw()
-
-  function draw() {
-
-    if (locked) return
-
-    console.log('draw!')
-
-    const rows = _.range(1, 10).map(faker.Helpers.createCard)
-    d3.select('.grid-target')
-        .style('height', '500px')
-        .datum(rows)
-        .call(table)
-  }
+  d3.select('.grid-target')
+      .style('height', '500px')
+      .datum(rows)
+      .call(table)
 
   function onUsernameChange(row, value) {
-    console.warn('CHANGE!')
     row.username = value.toUpperCase()
   }
 
