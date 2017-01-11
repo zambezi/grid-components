@@ -28,6 +28,10 @@
             'cell-selected-change.log'
           , (selected, active) => console.log(horribleBanner(selected, active))
           )
+          .on(
+            'cell-active-action'
+          , ({row, column}) => console.log('cell active action', row, column)
+          )
 
     , table = grid.createGrid()
           .columns(

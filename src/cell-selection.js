@@ -1,5 +1,5 @@
 import { dispatch  as createDispatch }  from 'd3-dispatch'
-import { rebind, forward, keyCodeHandler } from '@zambezi/d3-utils'
+import { rebind, keyCodeHandler } from '@zambezi/d3-utils'
 import { reduce, indexBy, findIndex, range, debounce } from 'underscore'
 import { select, event } from 'd3-selection'
 import { someResult as some } from '@zambezi/fun'
@@ -9,7 +9,7 @@ import './cell-selection.css'
 
 export function createCellSelection() {
 
-  const dispatch = createDispatch('cell-selected-change')
+  const dispatch = createDispatch('cell-selected-change', 'cell-active-action')
 
   let gesture = 'click'
     , selected = []
@@ -55,7 +55,7 @@ export function createCellSelection() {
           .on(
             'keydown.keyboard-cell-selection'
           , some(
-              keyCodeHandler(onEnter, 13)
+              keyCodeHandler(() => dispatch.call('cell-active-action', this, active), 13)
             , keyCodeHandler(onLeft, 37)
             , keyCodeHandler(onRight, 39)
             , keyCodeHandler(onUp, 38)
