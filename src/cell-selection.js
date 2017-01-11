@@ -1,7 +1,8 @@
 import { dispatch  as createDispatch }  from 'd3-dispatch'
-import { rebind, forward } from '@zambezi/d3-utils'
+import { rebind, forward, keyCodeHandler } from '@zambezi/d3-utils'
 import { reduce, indexBy, findIndex, range } from 'underscore'
 import { select, event } from 'd3-selection'
+import { someResult as some } from '@zambezi/fun'
 import { unwrap } from '@zambezi/grid'
 
 import './cell-selection.css'
@@ -41,9 +42,38 @@ export function createCellSelection() {
 
     if (selectedCandidates) updateFromCandidates()
 
+    setupKeyboardNavEvents()
+
     bundle.dispatcher
         .on('cell-enter.cell-selection', onCellEnter)
         .on('cell-update.cell-selection', onCellUpdate)
+
+    function setupKeyboardNavEvents() {
+      target.attr('tabindex', '0')
+          .on('focus', onFocus)
+          .on('blur', d => console.log('on blur'))
+          .on(
+            'keydown.keyboard-cell-selection'
+          , some(
+              keyCodeHandler(onEnter, 13)
+            , keyCodeHandler(onLeft, 37)
+            , keyCodeHandler(onRight, 39)
+            , keyCodeHandler(onUp, 38)
+            , keyCodeHandler(onDown, 40)
+            , keyCodeHandler(onTab, 9)
+            )
+          )
+    }
+
+    function onEnter(d) { console.log('on enter', event) }
+    function onLeft(d) { console.log('on Left', event) }
+    function onRight(d) { console.log('on Right', event) }
+    function onUp(d) { console.log('on Up', event) }
+    function onDown(d) { console.log('on Down', event) }
+    function onTab(d) { console.log('on Tab', event); event.preventDefault() }
+
+    function onFocus() {
+    }
 
     function updateFromCandidates() {
       selectedRowsByColumnId = selectedCandidates.reduce(toRealSelection, {})
