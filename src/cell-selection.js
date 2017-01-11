@@ -93,7 +93,10 @@ export function createCellSelection() {
       target.dispatch('redraw', { bubbles: true })
     }
 
-    function onTab(d) { console.log('on Tab', event); event.preventDefault() }
+    function onTab(d) { 
+      moveHorizontal(event.shiftKey ? -1 : 1)
+      event.preventDefault()
+    }
 
     function setActiveIfNone(d) {
       if (active) return
