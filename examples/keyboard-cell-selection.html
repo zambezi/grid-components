@@ -33,7 +33,7 @@
       , editUsername = gridComponents.createEditCellValue()
                         .on(
                           'change'
-                        , (row, value) => row.username = value.split('').reverse().join('')
+                        , (row, value) => row.username = value.toUpperCase()
                         )
                         .editable(isNotASomething)
                         .on('editend', () => target.node().focus())
