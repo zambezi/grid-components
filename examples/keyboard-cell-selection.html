@@ -5,13 +5,13 @@
 <style>
   .no-paste-target, 
   .external-paste-target {
-    background-color: blue;
+    background-color: #aaa;
     color: white;
     height: 200px;
   }
 
   .no-paste-target {
-    background-color: red;
+    background-color: #a00;
   }
 
 </style>
@@ -122,9 +122,13 @@
     output.text(
       `Paste event on: ${active ? active.row.username + ':' + active.column.id : '--'}
 
+      ${data.getData('text/plain')}
+
       \n▒▓ ${ Date.now().toString(32).toUpperCase() }
       `
     )
+
+    console.log(data, data.types, data.items)
   }
 
   function horribleBanner(selected, active) {
