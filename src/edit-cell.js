@@ -58,8 +58,6 @@ export function createEditCell() {
 
     function draw() {
 
-      console.log('edit cell draw!')
-
       if (isEditable && temp) {
         d.tempInput = temp.value
         d.isValidInput = !!temp.valid

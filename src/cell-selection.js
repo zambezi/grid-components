@@ -22,6 +22,7 @@ export function createCellSelection() {
     , selected = []
     , selectedCandidates
     , selectedRowsByColumnId = {}
+    , acceptPasteFrom = []
     , active
     , selectable = false
     , trackPaste = true
@@ -40,6 +41,12 @@ export function createCellSelection() {
   cellSelection.trackPaste = function(value) {
     if (!arguments.length) return trackPaste
     trackPaste = value
+    return cellSelection
+  }
+
+  cellSelection.acceptPasteFrom = function(value) {
+    if (!arguments.length) return acceptPasteFrom
+    acceptPasteFrom = value
     return cellSelection
   }
 
@@ -157,7 +164,9 @@ export function createCellSelection() {
 
     function onPaste() {
       const targetNode = target.node()
-      if (!targetNode.contains(document.activeElement)) return
+          , allAcceptedNodes = (acceptPasteFrom || []).concat(targetNode)
+
+      if (!allAcceptedNodes.some(n => n.contains(document.activeElement))) return
       dispatch.call('cell-active-paste', targetNode, active, event.clipboardData)
     }
 

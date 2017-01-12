@@ -2,6 +2,20 @@
 <head><meta charset="utf-8" /></head>
 <body>
 
+<style>
+  .no-paste-target, 
+  .external-paste-target {
+    background-color: blue;
+    color: white;
+    height: 200px;
+  }
+
+  .no-paste-target {
+    background-color: red;
+  }
+
+</style>
+
 <div class="grid-target"></div>
 
 <p>
@@ -11,6 +25,22 @@
 </p>
 
 <pre id="output"></pre>
+
+<div tabindex="0" class="external-paste-target">
+  <h1>external paste target</h1>
+</div>
+
+<hr/>
+
+<div tabindex="0" class="no-paste-target">
+  <h1>no paste target</h1>
+</div>
+
+<hr/>
+
+<div tabindex="0" class="external-paste-target">
+  <h1>another paste target</h1>
+</div>
 
 <link rel="stylesheet" type="text/css" href="../node_modules/normalize.css/normalize.css">
 <script src="../node_modules/underscore/underscore.js"></script>
@@ -29,7 +59,9 @@
             , (selected, active) => console.log(horribleBanner(selected, active))
             )
             .on('cell-active-action.edit', (cell) => editUsername.startEdit(cell))
-            .on('cell-active-paste', (active, data) => console.log('PASTE on grid', active, data))
+            .on('cell-active-paste.log', (active, data) => console.log('PASTE on grid', active, data))
+            .on('cell-active-paste.render', onPaste)
+            .acceptPasteFrom(d3.selectAll('.external-paste-target').nodes())
 
       , editUsername = gridComponents.createEditCellValue()
                         .on(
@@ -84,6 +116,15 @@
 
   function onDraw() {
     output.text(horribleBanner(cellSelection.selected(), cellSelection.active()))
+  }
+
+  function onPaste(active, data) {
+    output.text(
+      `Paste event on: ${active ? active.row.username + ':' + active.column.id : '--'}
+
+      \n▒▓ ${ Date.now().toString(32).toUpperCase() }
+      `
+    )
   }
 
   function horribleBanner(selected, active) {
