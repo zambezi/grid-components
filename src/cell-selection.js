@@ -63,37 +63,14 @@ export function createCellSelection() {
         , rows = bundle.rows
         , columnById = indexBy(columns, 'id')
 
-    d3.select(document).on(pasteId, trackPaste ? onPaste : null)
+    setupPasteEvents()
+    setupKeyboardNavEvents()
 
     if (selectedCandidates) updateFromCandidates()
-
-    setupKeyboardNavEvents()
 
     bundle.dispatcher
         .on('cell-enter.cell-selection', onCellEnter)
         .on('cell-update.cell-selection', onCellUpdate)
-
-    function setupKeyboardNavEvents() {
-      target.attr('tabindex', '0')
-          .on('focus', debounce(setActiveIfNone, 200))
-          .on(
-            'keydown.keyboard-cell-selection'
-          , some(
-              keyCodeHandler(() => dispatch.call('cell-active-action', this, active), 13) // enter
-            , keyCodeHandler(d => moveVertical(-1, d.rows), 38) // up
-            , keyCodeHandler(d => moveVertical(1, d.rows), 40)  // down
-            , keyCodeHandler(() => moveHorizontal(-1), 37)      // left
-            , keyCodeHandler(() => moveHorizontal(1), 39)       // right
-            , keyCodeHandler(onTab, 9)
-            )
-          )
-    }
-
-    function onPaste() {
-      const targetNode = target.node()
-      if (!targetNode.contains(document.activeElement)) return
-      dispatch.call('cell-active-paste', targetNode, active, event.clipboardData)
-    }
 
     function moveHorizontal(step) {
       if (!active) return
@@ -156,6 +133,32 @@ export function createCellSelection() {
 
     function compileSelected() {
       return reduce(selectedRowsByColumnId, toCells, [])
+    }
+
+    function setupKeyboardNavEvents() {
+      target.attr('tabindex', '0')
+          .on('focus', debounce(setActiveIfNone, 200))
+          .on(
+            'keydown.keyboard-cell-selection'
+          , some(
+              keyCodeHandler(() => dispatch.call('cell-active-action', this, active), 13) // enter
+            , keyCodeHandler(d => moveVertical(-1, d.rows), 38) // up
+            , keyCodeHandler(d => moveVertical(1, d.rows), 40)  // down
+            , keyCodeHandler(() => moveHorizontal(-1), 37)      // left
+            , keyCodeHandler(() => moveHorizontal(1), 39)       // right
+            , keyCodeHandler(onTab, 9)
+            )
+          )
+    }
+
+    function setupPasteEvents() {
+      d3.select(document).on(pasteId, trackPaste ? onPaste : null)
+    }
+
+    function onPaste() {
+      const targetNode = target.node()
+      if (!targetNode.contains(document.activeElement)) return
+      dispatch.call('cell-active-paste', targetNode, active, event.clipboardData)
     }
 
     function onCellEnter(d, i) {
