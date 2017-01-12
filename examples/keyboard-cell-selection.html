@@ -29,6 +29,7 @@
             , (selected, active) => console.log(horribleBanner(selected, active))
             )
             .on('cell-active-action.edit', (cell) => editUsername.startEdit(cell))
+            .on('cell-active-paste', (active, data) => console.log('PASTE on grid', active, data))
 
       , editUsername = gridComponents.createEditCellValue()
                         .on(

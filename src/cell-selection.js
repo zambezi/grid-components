@@ -1,7 +1,7 @@
 import { dispatch  as createDispatch }  from 'd3-dispatch'
 import { modulo } from '@zambezi/fun'
 import { rebind, keyCodeHandler } from '@zambezi/d3-utils'
-import { reduce, indexBy, findIndex, range, debounce, map } from 'underscore'
+import { reduce, indexBy, findIndex, range, debounce, map, uniqueId } from 'underscore'
 import { select, event } from 'd3-selection'
 import { someResult as some } from '@zambezi/fun'
 import { unwrap } from '@zambezi/grid'
@@ -14,7 +14,9 @@ export function createCellSelection() {
           'cell-selected-change'
         , 'cell-active-action'
         , 'cell-active-change'
+        , 'cell-active-paste'
         )
+      , pasteId = uniqueId('paste.')
 
   let gesture = 'click'
     , selected = []
@@ -22,6 +24,7 @@ export function createCellSelection() {
     , selectedRowsByColumnId = {}
     , active
     , selectable = false
+    , trackPaste = true
 
   function cellSelection(s) {
     s.each(cellSelectionEach)
@@ -31,6 +34,12 @@ export function createCellSelection() {
     if (!arguments.length) return selected
     selected = value
     selectedCandidates = value
+    return cellSelection
+  }
+
+  cellSelection.trackPaste = function(value) {
+    if (!arguments.length) return trackPaste
+    trackPaste = value
     return cellSelection
   }
 
@@ -53,6 +62,8 @@ export function createCellSelection() {
         , columns = bundle.columns
         , rows = bundle.rows
         , columnById = indexBy(columns, 'id')
+
+    d3.select(document).on(pasteId, trackPaste ? onPaste : null)
 
     if (selectedCandidates) updateFromCandidates()
 
@@ -78,7 +89,13 @@ export function createCellSelection() {
           )
     }
 
-    function moveHorizontal(step) { 
+    function onPaste() {
+      const targetNode = target.node()
+      if (!targetNode.contains(document.activeElement)) return
+      dispatch.call('cell-active-paste', targetNode, active, event.clipboardData)
+    }
+
+    function moveHorizontal(step) {
       if (!active) return
 
       const { column, row } = active
@@ -101,7 +118,7 @@ export function createCellSelection() {
       target.dispatch('redraw', { bubbles: true })
     }
 
-    function onTab(d) { 
+    function onTab(d) {
       moveHorizontal(event.shiftKey ? -1 : 1)
       event.preventDefault()
     }
