@@ -52,7 +52,7 @@
 <script src="../dist/grid-components.js"></script>
 <script>
 
-  const rows = _.range(1, 15).map(faker.Helpers.createCard)
+  const rows = _.range(1, 5).map(faker.Helpers.createCard)
       , cellSelection = gridComponents.createCellSelection()
             .on(
               'cell-selected-change.log'
@@ -64,10 +64,7 @@
             .acceptPasteFrom(d3.selectAll('.external-paste-target').nodes())
 
       , editUsername = gridComponents.createEditCellValue()
-                        .on(
-                          'change'
-                        , (row, value) => row.username = value.toUpperCase()
-                        )
+                        .on('change' , (row, value) => row.username = value.toUpperCase())
                         .editable(isNotASomething)
                         .on('editend', () => target.node().focus())
 
@@ -90,6 +87,8 @@
             )
             .usePre(cellSelection)
             .on('draw.log', onDraw)
+            .rowKey(r => r.phone)
+            .rowChangedKey(rowChangedKey)
 
       , output = d3.select('#output')
       , target = d3.select('.grid-target')
@@ -113,6 +112,11 @@
       , () => cellSelection.selected([ { row: 1, column: 'username' }, { row: 2, column: 'email'} ])
       )
       .on('click.redraw', () => target.call(table))
+
+  function rowChangedKey(r) {
+    console.log('rowChangedKey', r)
+    return _.uniqueId()
+  }
 
   function onDraw() {
     output.text(horribleBanner(cellSelection.selected(), cellSelection.active()))

@@ -66,7 +66,6 @@ function createEditValue() {
     if (d.isValidInput) input.node().focus()
 
     function onEnter(d) {
-      console.log('onEnter', d)
       event.stopPropagation()
       onCommit.call(this, d)
     }
