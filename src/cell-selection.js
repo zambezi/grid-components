@@ -159,7 +159,7 @@ export function createCellSelection() {
     }
 
     function setupPasteEvents() {
-      d3.select(document).on(pasteId, trackPaste ? onPaste : null)
+      select(document).on(pasteId, trackPaste ? onPaste : null)
     }
 
     function onPaste() {
