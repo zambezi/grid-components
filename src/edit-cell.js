@@ -42,17 +42,9 @@ export function createEditCell() {
           , eventRow = cell.row
           , isTargetRowEditable = editable.call(this, cell)
 
-      if (eventColumn.id !== column.id) {
-        console.log('not for my column')
-        return
-      }
+      if (eventColumn.id !== column.id) return
+      if (!isTargetRowEditable) return
 
-      if (!isTargetRowEditable) {
-        console.log('not editable')
-        return
-      }
-
-      console.log('start external edit', cell, column, this)
       startEdit(cell)
     }
 

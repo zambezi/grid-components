@@ -24,7 +24,7 @@ export function createCellSelection() {
     , selectedRowsByColumnId = {}
     , acceptPasteFrom = []
     , active
-    , selectable = false
+    , selectable = true
     , trackPaste = true
 
   function cellSelection(s) {
@@ -60,6 +60,26 @@ export function createCellSelection() {
     if (!arguments.length) return active
     active = value
     return cellSelection
+  }
+
+  cellSelection.rowChangedKey = function(targetRow) {
+    const unwrappedRow = unwrap(targetRow)
+        , selectedColumnIds = []
+    let key = ''
+
+    selected.forEach(addSelected)
+
+    function addSelected({row, column}) {
+      if (unwrappedRow !== row) return
+      selectedColumnIds.push(column.id)
+    }
+
+    key = selectedColumnIds.join('↑')
+
+    if (active && unwrappedRow === active.row) {
+      key += ('☆' + active.column.id)
+    }
+    return key
   }
 
   return rebind().from(dispatch, 'on')(cellSelection)

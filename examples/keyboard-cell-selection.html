@@ -83,6 +83,7 @@
                 , sort: (a, b) => d3.ascending(a.name, b.name)
                 }
               , { key: 'phone' }
+              , { label: 'changed', format: () => _.uniqueId() }
               ]
             )
             .usePre(cellSelection)
@@ -114,8 +115,7 @@
       .on('click.redraw', () => target.call(table))
 
   function rowChangedKey(r) {
-    console.log('rowChangedKey', r)
-    return _.uniqueId()
+    return `${r.phone}:${cellSelection.rowChangedKey(r)}`
   }
 
   function onDraw() {
