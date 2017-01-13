@@ -54,10 +54,12 @@
 
   const rows = _.range(1, 5).map(faker.Helpers.createCard)
       , cellSelection = gridComponents.createCellSelection()
+            /*
             .on(
               'cell-selected-change.log'
             , (selected, active) => console.log(horribleBanner(selected, active))
             )
+            */
             .on('cell-active-action.edit', (cell) => editUsername.startEdit(cell))
             .on('cell-active-paste.log', (active, data) => console.log('PASTE on grid', active, data))
             .on('cell-active-paste.render', onPaste)
@@ -115,7 +117,13 @@
       .on('click.redraw', () => target.call(table))
 
   function rowChangedKey(r) {
-    return `${r.phone}:${cellSelection.rowChangedKey(r)}`
+    return  `
+
+      ${r.name}
+      ${cellSelection.rowChangedKey(r)}
+      ${editUsername.rowChangedKey(r)}
+
+    `
   }
 
   function onDraw() {

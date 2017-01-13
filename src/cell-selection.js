@@ -204,8 +204,6 @@ export function createCellSelection() {
           , isAlreadySelected = set && set.has(row)
           , hasActive = !!active
 
-      setActive(target)
-
       if (selectable) {
         switch(true) {
           case ctrlKey && shiftKey && hasActive:
@@ -232,6 +230,7 @@ export function createCellSelection() {
         dispatch.call('cell-selected-change', this, selected, active)
       }
 
+      setActive(target)
       select(this).dispatch('redraw', { bubbles: true })
     }
 

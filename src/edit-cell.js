@@ -22,7 +22,7 @@ export function createEditCell() {
 
   function editCellEach(d, i) {
 
-    const isEditable = editable.call(this, d, i) 
+    const isEditable = editable.call(this, d, i)
         , row = unwrap(d.row)
         , column = d.column
         , temp = rowToTemp.get(row)
@@ -70,7 +70,6 @@ export function createEditCell() {
       }
     }
 
-
     function cacheTemp(d) {
       rowToTemp.set(unwrap(d.row), { value: this.value, valid: true })
     }
@@ -110,8 +109,17 @@ export function createEditCell() {
       dispatch.call('editstart', this, unwrappedRow)
       cellTarget.dispatch('redraw', { bubbles: true })
     }
+
+    // Reconfigure row changed key function after first run
+    editCellEach.rowChangedKey = function(targetRow) {
+      const isEditing = !!rowToTemp.get(unwrap(targetRow))
+      return isEditing ? '★' : '-'
+    }
   }
 
+  editCellEach.rowChangedKey = function(targetRow) {
+    return '-'
+  }
 
   editCellEach.component = function(value) {
     if (!arguments.length) return component
