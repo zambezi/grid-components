@@ -41,7 +41,7 @@ function createEditValue() {
     const input = select(this)
             .select(appendInput)
               .classed('error', !d.isValidInput)
-              .property('value', d.tempInput || '')
+              .property('value', d.value || '')
               .on('input', () => dispatch.call('partialedit', input.node(), d))
               .on('keypress.valid-character', characterClassValidator)
               .on(

@@ -1,5 +1,5 @@
 import { appendIfMissing, rebind } from '@zambezi/d3-utils'
-import { compose } from 'underscore'
+import { compose, isUndefined } from 'underscore'
 import { dispatch as createDispatch } from 'd3-dispatch'
 import { select, event } from 'd3-selection'
 import { unwrap } from '@zambezi/grid'
@@ -45,7 +45,7 @@ export function createEditCell() {
       if (eventColumn.id !== column.id) return
       if (!isTargetRowEditable) return
 
-      startEdit(cell)
+      startEdit(cell, initValue)
     }
 
     function draw() {
@@ -99,13 +99,20 @@ export function createEditCell() {
       }
     }
 
-    function startEdit(cell) {
+    function startEdit(cell, initValue) {
       const unwrappedRow = unwrap(cell.row)
           , isAlreadyEditing = (rowToTemp.get(unwrappedRow) !== undefined)
 
       if (isAlreadyEditing) return
 
-      rowToTemp.set(unwrappedRow, { value: cell.value, valid: true })
+      rowToTemp.set(
+        unwrappedRow
+      , {
+          value: isUndefined(initValue) ? cell.value : initValue
+        , valid: true
+        }
+      )
+
       dispatch.call('editstart', this, unwrappedRow)
       cellTarget.dispatch('redraw', { bubbles: true })
     }
