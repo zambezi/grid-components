@@ -58,6 +58,7 @@ export function createEditCell() {
             .on('partialedit.cache', cacheTemp)
             .on('cancel.clear', removeTmp)
             .on('cancel.notify', notifyEditEnd)
+            .on('cancel.redraw', () => cellTarget.dispatch('redraw', { bubbles: true }) )
             .on('commit.process', compose(notifyEditEnd, validateChange))
             .on('commit.redraw', () => cellTarget.dispatch('redraw', { bubbles: true }) )
 

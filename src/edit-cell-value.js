@@ -89,6 +89,7 @@ function createEditValue() {
 
     function onCancel(d) {
       isCancelled = true
+      event.stopPropagation()
       dispatch.call('cancel', input.node(), d)
     }
   }
