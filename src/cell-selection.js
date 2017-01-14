@@ -186,9 +186,14 @@ export function createCellSelection() {
     }
 
     function activateFromInput(d) {
+      const { key } = event
+
       if (!typeToActivate) return
       if (!active) return
-      dispatch.call('cell-active-action', target.node(), active, event.key)
+
+      if (isASpecialKey(key)) return
+
+      dispatch.call('cell-active-action', target.node(), active, key)
     }
 
     function onPaste() {
@@ -331,6 +336,11 @@ export function createCellSelection() {
   }
 }
 
+function isASpecialKey(key) {
+  return key.length > 1
+}
+
 function areSameCell(a, b) {
   return a && b && unwrap(a.row) == unwrap(b.row) && a.column == b.column
 }
+
