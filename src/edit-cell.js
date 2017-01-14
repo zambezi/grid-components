@@ -100,7 +100,8 @@ export function createEditCell() {
     }
 
     function startEdit(cell, initValue) {
-      const unwrappedRow = unwrap(cell.row)
+      const { row, value } = cell
+          , unwrappedRow = unwrap(row)
           , isAlreadyEditing = (rowToTemp.get(unwrappedRow) !== undefined)
 
       if (isAlreadyEditing) return
