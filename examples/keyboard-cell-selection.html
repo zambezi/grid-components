@@ -54,7 +54,7 @@
 
   const rows = _.range(1, 500).map(faker.Helpers.createCard)
       , cellSelection = gridComponents.createCellSelection()
-            .on('cell-active-action.edit', (cell) => editUsername.startEdit(cell))
+            .on('cell-active-action.edit', (cell, initValue) => editUsername.startEdit(cell, initValue))
             .on('cell-active-paste.log', (active, data) => console.log('PASTE on grid', active, data))
             .on('cell-active-paste.render', onPaste)
             .acceptPasteFrom(d3.selectAll('.external-paste-target').nodes())

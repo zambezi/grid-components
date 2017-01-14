@@ -26,6 +26,7 @@ export function createCellSelection() {
     , active
     , selectable = true
     , trackPaste = true
+    , typeToActivate = true
 
   function cellSelection(s) {
     s.each(cellSelectionEach)
@@ -47,6 +48,12 @@ export function createCellSelection() {
   cellSelection.acceptPasteFrom = function(value) {
     if (!arguments.length) return acceptPasteFrom
     acceptPasteFrom = value
+    return cellSelection
+  }
+
+  cellSelection.typeToActivate = function(value) {
+    if (!arguments.length) return typeToActivate
+    typeToActivate = value
     return cellSelection
   }
 
@@ -122,11 +129,6 @@ export function createCellSelection() {
       target.dispatch('redraw', { bubbles: true })
     }
 
-    function onTab(d) {
-      moveHorizontal(event.shiftKey ? -1 : 1)
-      event.preventDefault()
-    }
-
     function setActiveIfNone(d) {
       if (active) return
       if (!bundle.length) return
@@ -174,6 +176,7 @@ export function createCellSelection() {
             , keyCodeHandler(() => moveHorizontal(-1), 37)      // left
             , keyCodeHandler(() => moveHorizontal(1), 39)       // right
             , keyCodeHandler(onTab, 9)
+            , activateFromInput
             )
           )
     }
@@ -182,12 +185,23 @@ export function createCellSelection() {
       select(document).on(pasteId, trackPaste ? onPaste : null)
     }
 
+    function activateFromInput(d) {
+      if (!typeToActivate) return
+      if (!active) return
+      dispatch.call('cell-active-action', target.node(), active, event.key)
+    }
+
     function onPaste() {
       const targetNode = target.node()
           , allAcceptedNodes = (acceptPasteFrom || []).concat(targetNode)
 
       if (!allAcceptedNodes.some(n => n.contains(document.activeElement))) return
       dispatch.call('cell-active-paste', targetNode, active, event.clipboardData)
+    }
+
+    function onTab(d) {
+      moveHorizontal(event.shiftKey ? -1 : 1)
+      event.preventDefault()
     }
 
     function onCellEnter(d, i) {
