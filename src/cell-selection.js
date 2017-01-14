@@ -186,17 +186,19 @@ export function createCellSelection() {
     }
 
     function activateFromInput(d) {
-      const { key } = event
+      const { key, ctrlKey, altKey, metaKey } = event
 
       if (!typeToActivate) return
+      if (ctrlKey || altKey || metaKey) return
       if (!active) return
-
       if (isASpecialKey(key)) return
 
       dispatch.call('cell-active-action', target.node(), active, key)
     }
 
     function onPaste() {
+
+
       const targetNode = target.node()
           , allAcceptedNodes = (acceptPasteFrom || []).concat(targetNode)
 
