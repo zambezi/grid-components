@@ -3,7 +3,7 @@
 <body>
 
 <style>
-  .no-paste-target, 
+  .no-paste-target,
   .external-paste-target {
     background-color: #aaa;
     color: white;
@@ -52,14 +52,8 @@
 <script src="../dist/grid-components.js"></script>
 <script>
 
-  const rows = _.range(1, 5).map(faker.Helpers.createCard)
+  const rows = _.range(1, 500).map(faker.Helpers.createCard)
       , cellSelection = gridComponents.createCellSelection()
-            /*
-            .on(
-              'cell-selected-change.log'
-            , (selected, active) => console.log(horribleBanner(selected, active))
-            )
-            */
             .on('cell-active-action.edit', (cell) => editUsername.startEdit(cell))
             .on('cell-active-paste.log', (active, data) => console.log('PASTE on grid', active, data))
             .on('cell-active-paste.render', onPaste)
@@ -69,6 +63,7 @@
                         .on('change' , (row, value) => row.username = value.toUpperCase())
                         .editable(isNotASomething)
                         .on('editend', () => target.node().focus())
+                        .validate(validateUserName)
 
       , table = grid.createGrid()
             .columns(
@@ -124,6 +119,20 @@
       ${editUsername.rowChangedKey(r)}
 
     `
+  }
+
+  function validateUserName(row, value) {
+    if (!value) return 'Username cannot be empty'
+    if (!value.split('').some(isDifferentCharacter())) return 'Cannot all be the same character'
+  }
+
+  function isDifferentCharacter() {
+    let found
+    return function check(ch) {
+      if (found && !~found.indexOf(ch)) return true
+      found = ch
+      return false
+    }
   }
 
   function onDraw() {

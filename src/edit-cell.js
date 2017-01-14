@@ -31,7 +31,7 @@ export function createEditCell() {
 
     cellTarget.classed('editable-cell', isEditable)
         .on('click.quiet', isEditable ? () => event.stopPropagation() : null)
-        .on(gesture + '.start', isEditable ? startEdit : null)
+        .on(gesture + '.start', isEditable ? cell => startEdit(cell) : null)
 
     internalDispatch.on(`external-edit-request.${column.id}`, startExternalEdit)
     draw()
@@ -120,8 +120,12 @@ export function createEditCell() {
 
     // Reconfigure row changed key function after first run
     editCellEach.rowChangedKey = function(targetRow) {
-      const isEditing = !!rowToTemp.get(unwrap(targetRow))
-      return isEditing ? '★' : '-'
+      const temp = rowToTemp.get(unwrap(targetRow))
+          , isEditing = !!temp
+
+      return !isEditing   ? '-'
+            : temp.valid  ? '★' 
+            : '☆'
     }
   }
 
