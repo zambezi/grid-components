@@ -57,8 +57,8 @@ function createEditValue() {
                   , keyDownHandlers.concat(
                       [
                         keyCodeHandler(onCancel, 27) // esc
+                      , keyCodeHandler(onCancel, 9)  // tab
                       , keyCodeHandler(onEnter, 13)  // enter
-                      , keyCodeHandler(onCommit, 9)  // tab
                       , keyCodeHandler(stopPropagation, 38) // up
                       , keyCodeHandler(stopPropagation, 40) // down
                       , keyCodeHandler(stopPropagation, 37) // left
