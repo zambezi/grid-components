@@ -39,15 +39,15 @@ function createEditValue() {
     let isCancelled
       , isCommited
 
-    const input = select(this)
+    const value = !isUndefined(d.tempInput) ? d.tempInput
+                : !isUndefined(d.value)     ? d.value
+                :  ''
+
+        , input = select(this)
             .select(appendInput)
               .classed('error', !d.isValidInput)
-              .property(
-                'value'
-              ,   !isUndefined(d.tempInput) ? d.tempInput 
-                : !isUndefined(d.value)     ? d.value 
-                :  ''
-              )
+              .property('value' , value)
+              .each(setCursorAtEnd)
               .on('input', () => dispatch.call('partialedit', input.node(), d))
               .on('keypress.valid-character', characterClassValidator)
               .on(
@@ -73,6 +73,10 @@ function createEditValue() {
 
     function stopPropagation() {
       event.stopPropagation()
+    }
+
+    function setCursorAtEnd(d, i) {
+      this.setSelectionRange(value.length, value.length)
     }
 
     function onCommit(d) {

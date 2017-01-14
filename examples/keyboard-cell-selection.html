@@ -62,6 +62,7 @@
       , editUsername = gridComponents.createEditCellValue()
                         .on('change' , (row, value) => row.username = value.toUpperCase())
                         .editable(isNotASomething)
+                        .on('editend.log', () => console.warn('edit end'))
                         .on('editend', () => target.node().focus())
                         .validate(validateUserName)
 
