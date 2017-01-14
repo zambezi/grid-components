@@ -59,10 +59,10 @@ function createEditValue() {
                         keyCodeHandler(onCancel, 27) // esc
                       , keyCodeHandler(onEnter, 13)  // enter
                       , keyCodeHandler(onCommit, 9)  // tab
-                      , keyCodeHandler(onCommit, 38) // up
-                      , keyCodeHandler(onCommit, 40) // down
-                      , keyCodeHandler(onCommit, 37) // left
-                      , keyCodeHandler(onCommit, 39) // right
+                      , keyCodeHandler(stopPropagation, 38) // up
+                      , keyCodeHandler(stopPropagation, 40) // down
+                      , keyCodeHandler(stopPropagation, 37) // left
+                      , keyCodeHandler(stopPropagation, 39) // right
                       ]
                     )
                 )
@@ -70,6 +70,10 @@ function createEditValue() {
               .on('blur.process', onCommit)
 
     if (d.isValidInput) input.node().focus()
+
+    function stopPropagation() {
+      event.stopPropagation()
+    }
 
     function onEnter(d) {
       event.stopPropagation()
