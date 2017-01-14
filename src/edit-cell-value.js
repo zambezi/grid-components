@@ -3,7 +3,7 @@ import { createEditCell } from './edit-cell'
 import { dispatch as createDispatch } from 'd3-dispatch'
 import { isUndefined } from 'underscore'
 import { select, event } from 'd3-selection'
-import { someResult as some } from '@zambezi/fun'
+import { someResult as some, batch } from '@zambezi/fun'
 
 const appendInput = appendIfMissing('input.edit-value')
 
@@ -56,9 +56,9 @@ function createEditValue() {
                     null
                   , keyDownHandlers.concat(
                       [
-                        keyCodeHandler(onCancel, 27) // esc
-                      , keyCodeHandler(onCancel, 9)  // tab
-                      , keyCodeHandler(onEnter, 13)  // enter
+                        keyCodeHandler(onCancel, 9)  // tab
+                      , keyCodeHandler(batch(stopPropagation, onCancel), 27) // esc
+                      , keyCodeHandler(batch(stopPropagation, onCommit), 13)  // enter
                       , keyCodeHandler(stopPropagation, 38) // up
                       , keyCodeHandler(stopPropagation, 40) // down
                       , keyCodeHandler(stopPropagation, 37) // left
@@ -75,11 +75,6 @@ function createEditValue() {
       event.stopPropagation()
     }
 
-    function onEnter(d) {
-      event.stopPropagation()
-      onCommit.call(this, d)
-    }
-
     function onCommit(d) {
       if (isCancelled) return
       if (isCommited) return
@@ -89,7 +84,6 @@ function createEditValue() {
 
     function onCancel(d) {
       isCancelled = true
-      event.stopPropagation()
       dispatch.call('cancel', input.node(), d)
     }
   }
