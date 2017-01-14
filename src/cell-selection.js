@@ -182,7 +182,9 @@ export function createCellSelection() {
     }
 
     function setupPasteEvents() {
-      select(document).on(pasteId, trackPaste ? onPaste : null)
+      select(document)
+          .on(pasteId, trackPaste ? onPaste : null)
+          .on(`keypress.${pasteId}`, trackPaste ? onPaste : null)
     }
 
     function activateFromInput(d) {
@@ -197,13 +199,28 @@ export function createCellSelection() {
     }
 
     function onPaste() {
-
-
       const targetNode = target.node()
           , allAcceptedNodes = (acceptPasteFrom || []).concat(targetNode)
 
       if (!allAcceptedNodes.some(n => n.contains(document.activeElement))) return
-      dispatch.call('cell-active-paste', targetNode, active, event.clipboardData)
+
+      let clipboardData = event.clipboardData
+      let text = ''
+
+      if (!clipboardData) {
+        // oh oh, smells like IE
+        if (!event.ctrlKey) return
+        if (event.key !== 'v') return
+        clipboardData = window.clipboardData
+      }
+
+      try {
+        text = clipboardData.getData('Text')
+      } catch(e) {
+        console.warn('Unable to extract clipboard data', e)
+      }
+
+      dispatch.call('cell-active-paste', targetNode, active, text)
     }
 
     function onTab(d) {
