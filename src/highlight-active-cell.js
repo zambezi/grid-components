@@ -6,13 +6,12 @@ import { unwrap } from '@zambezi/grid'
 import './highlight-active-cell.css'
 
 const highlightContainer = appendIfMissing('div.active-cell-highlight.zambezi-grid-overlay')
-    , markerBox = appendIfMissing('h1.marker-box')
+    , markerBox = appendIfMissing('div.marker-box')
     , activePositionChanged = selectionChanged()
           .key(d => d)
           .debug(true)
 
 export function createHighlightActiveCell() {
-
   let activeCell
     , rowIndex
     , columnClass
@@ -33,11 +32,10 @@ export function createHighlightActiveCell() {
   function highlightActiveCellEach(d, i) {
     const marker = select(this)
             .on('data-dirty.invalidate-highlight-active-cell', d => rowIndex = undefined)
-          .select('.zambezi-grid-stirrup')
+          .select('.zambezi-grid-body')
           .select(highlightContainer)
           .select(markerBox)
             .style('position', 'absolute')
-            .text('×')
             .style('transform', `translate(0, ${-d.scroll.top}px)`)
 
     let wrappedRow
@@ -51,7 +49,7 @@ export function createHighlightActiveCell() {
     marker.datum(`${rowIndex}×${columnClass}`)
         .select(activePositionChanged)
         .attr('data-grid-row-index', rowIndex)
-        .attr('class', `marker-box ${columnClass}`)
+        .attr('class', `marker-box zambezi-grid-row ${columnClass}`)
         .style('display', isUndefined(rowIndex) ? 'none' : null)
 
   }
