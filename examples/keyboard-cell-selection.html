@@ -53,11 +53,14 @@
 <script>
 
   const rows = _.range(1, 500).map(faker.Helpers.createCard)
+        highlightActiveCell = gridComponents.createHighlightActiveCell()
       , cellSelection = gridComponents.createCellSelection()
             .on('cell-active-action.edit', (cell, initValue) => editUsername.startEdit(cell, initValue))
             .on('cell-active-paste.log', (active, data) => console.log('PASTE on grid', active, data))
             .on('cell-active-paste.render', onPaste)
+            .on('cell-active-change.highlight', highlightActiveCell.activeCell)
             .acceptPasteFrom(d3.selectAll('.external-paste-target').nodes())
+
 
       , editUsername = gridComponents.createEditCellValue()
                         .on('change' , (row, value) => row.username = value.toUpperCase())
@@ -69,7 +72,7 @@
       , table = grid.createGrid()
             .columns(
               [
-                { key: 'name', locked: 'left', width: 200 }
+                { key: 'name', width: 200 }
               , {
                   key: 'username'
                 , components: [ editUsername, grid.updateTextIfChanged ]
@@ -85,6 +88,7 @@
               ]
             )
             .usePre(cellSelection)
+            .use(highlightActiveCell)
             .on('draw.log', onDraw)
             .rowKey(r => r.phone)
             .rowChangedKey(rowChangedKey)
