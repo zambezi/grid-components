@@ -1,3 +1,4 @@
 .active-cell-highlight .marker-box {
   border: 2px solid black;
+  top: -100px;
 }
