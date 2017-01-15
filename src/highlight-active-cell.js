@@ -7,9 +7,7 @@ import './highlight-active-cell.css'
 
 const highlightContainer = appendIfMissing('div.active-cell-highlight.zambezi-grid-overlay')
     , markerBox = appendIfMissing('div.marker-box')
-    , activePositionChanged = selectionChanged()
-          .key(d => d)
-          .debug(true)
+    , activePositionChanged = selectionChanged().key(d => d)
 
 export function createHighlightActiveCell() {
   let activeCell
