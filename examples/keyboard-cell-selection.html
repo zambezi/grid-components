@@ -144,17 +144,15 @@
     output.text(horribleBanner(cellSelection.selected(), cellSelection.active()))
   }
 
-  function onPaste(active, data) {
+  function onPaste(active, text) {
     output.text(
       `Paste event on: ${active ? active.row.username + ':' + active.column.id : '--'}
 
-      ${data.getData('text/plain')}
+      ${text}
 
       \n▒▓ ${ Date.now().toString(32).toUpperCase() }
       `
     )
-
-    console.log(data, data.types, data.items)
   }
 
   function horribleBanner(selected, active) {
