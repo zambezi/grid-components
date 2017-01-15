@@ -41,7 +41,10 @@ export function createHighlightActiveCell() {
 
     if (activeCell && isUndefined(rowIndex)) {
       wrappedRow = find(d.rows.free, r => unwrap(r) == activeCell.row)
-      rowIndex = wrappedRow.freeRowNumber
+      rowIndex = wrappedRow && wrappedRow.freeRowNumber
+
+      if (!wrappedRow) activeCell = null  // we don't have the row, quit
+                                          // searching
     }
 
     marker.datum(`${rowIndex}×${columnClass}`)
