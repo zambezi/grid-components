@@ -14,9 +14,11 @@ export function createCellSelection() {
           'cell-selected-change'
         , 'cell-active-action'
         , 'cell-active-change'
+        , 'cell-active-copy'
         , 'cell-active-paste'
         )
       , pasteId = uniqueId('paste.')
+      , copyId = uniqueId('copy.')
 
   let gesture = 'click'
     , selected = []
@@ -98,6 +100,7 @@ export function createCellSelection() {
         , columnById = indexBy(columns, 'id')
 
     setupPasteEvents()
+    setupCopyEvents()
     setupKeyboardNavEvents()
 
     if (selectedCandidates) updateFromCandidates()
@@ -187,15 +190,23 @@ export function createCellSelection() {
           .on(`keypress.${pasteId}`, trackPaste ? onPaste : null)
     }
 
-    function activateFromInput(d) {
-      const { key, ctrlKey, altKey, metaKey } = event
+    function setupCopyEvents() {
+      select(document)
+          .on(`keydown.${copyId}`, trackPaste ? onCopy : null)
+    }
 
-      if (!typeToActivate) return
-      if (ctrlKey || altKey || metaKey) return
-      if (!active) return
-      if (isASpecialKey(key)) return
+    function onCopy() {
+      const targetNode = target.node()
+          , { ctrlKey, key } = event
 
-      dispatch.call('cell-active-action', target.node(), active, key)
+      if (key !== 'c') return 
+      if (!ctrlKey) return 
+      if (!targetNode.contains(document.activeElement)) return
+
+      event.preventDefault()
+      event.stopPropagation()
+
+      dispatch.call('cell-active-copy', targetNode, active, selected)
     }
 
     function onPaste() {
@@ -221,6 +232,17 @@ export function createCellSelection() {
       }
 
       dispatch.call('cell-active-paste', targetNode, active, text)
+    }
+
+    function activateFromInput(d) {
+      const { key, ctrlKey, altKey, metaKey } = event
+
+      if (!typeToActivate) return
+      if (ctrlKey || altKey || metaKey) return
+      if (!active) return
+      if (isASpecialKey(key)) return
+
+      dispatch.call('cell-active-action', target.node(), active, key)
     }
 
     function onTab(d) {
