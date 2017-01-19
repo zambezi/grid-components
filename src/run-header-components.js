@@ -28,9 +28,9 @@ function columnChangeKey(column) {
     column.id
   , column.label || '·'
   , column.key || '·'
-  , ~~column.offset
-  , ~~column.absoluteOffset
-  , ~~column.width
+  , Math.round(column.offset)
+  , Math.round(column.absoluteOffset)
+  , Math.round(column.width)
   , column.sortAscending || '·'
   , column.sortDescending || '·'
   ]
