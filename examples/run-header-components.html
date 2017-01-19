@@ -1,0 +1,74 @@
+<!doctype html>
+<head><meta charset="utf-8" /></head>
+<body>
+<style>
+  button.fancy {
+    background-color: yellow;
+    display: block;
+    position: absolute;
+    right: 14px;
+    top: 4px;
+    border: 1px dotted #888;
+    color: white;
+    background: black;
+  }
+
+</style>
+<h1>Run header components</h1>
+
+<div class="grid-target"></div>
+<link rel="stylesheet" type="text/css" href="../node_modules/normalize.css/normalize.css">
+<script src="../node_modules/underscore/underscore.js"></script>
+<script src="../node_modules/d3/build/d3.js"></script>
+<script src="../node_modules/@zambezi/d3-utils/dist/d3-utils.js"></script>
+<script src="../node_modules/@zambezi/fun/dist/fun.js"></script>
+<script src="../node_modules/faker/faker.js"></script>
+<script src="../node_modules/@zambezi/grid/dist/grid.js"></script>
+<script src="../dist/grid-components.js"></script>
+<script>
+
+  const table = grid.createGrid()
+            .columns(
+              [
+                { 
+                  key: 'name'
+                , locked: 'left'
+                , width: 200 
+                , headerComponents: [ fancyButton ] 
+                }
+              , {
+                  key: 'username', headerComponents: [ ]
+                , headerComponents: [ colorPretty ]
+                }
+              , { key: 'email', sortDescending: true }
+              , {
+                  key: 'phone'
+                , headerComponents: [ colorPretty, fancyButton ]
+                }
+              ]
+            )
+            .use(gridComponents.createRunHeaderComponents())
+
+    , rows = _.range(1, 2000).map(faker.Helpers.createCard)
+    , color = d3.scaleOrdinal().range(d3.schemeCategory10)
+
+  d3.select('.grid-target')
+      .style('height', '500px')
+      .datum(rows)
+      .call(table)
+
+  function colorPretty(d, i) {
+    d3.select(this)
+        .style('background-color', color(d.id))
+        .style('color', color(d.id + ':text'))
+  }
+
+  function fancyButton(d, i) {
+    const append = d3Utils.appendIfMissing('button.fancy')
+    d3.select(this).select(append).text(d.id)
+      .on('click.log', d => alert(`YEP ${d.id}!`))
+      .on('click.swallow', () => d3.event.stopPropagation() )
+  }
+
+</script>
+</body>
