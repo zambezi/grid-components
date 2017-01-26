@@ -37,7 +37,6 @@ const rows = _.range(1, 500).map(faker.Helpers.createCard)
           )
           .use(gridComponents.createDragToSelect())
 
-
     , target = d3.select('.grid-target')
           .style('height', '500px')
           .datum(rows)

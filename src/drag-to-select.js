@@ -1,9 +1,12 @@
-
+import { drag } from 'd3-drag'
 
 export function createDragToSelect() {
 
+
+  console.log(drag())
+
   function dragToSelect(s) {
-    console.log('drag to select on', s.node())
+    s.call(drag)
   }
 
   return dragToSelect
