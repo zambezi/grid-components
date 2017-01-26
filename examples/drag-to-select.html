@@ -35,7 +35,7 @@ const rows = _.range(1, 500).map(faker.Helpers.createCard)
             , { label: 'changed', format: () => _.uniqueId('ch:') }
             ]
           )
-          .use(gridComponents.createDragToSelect())
+          .usePre(gridComponents.createDragToSelect())
 
     , target = d3.select('.grid-target')
           .style('height', '500px')
