@@ -1,6 +1,6 @@
 {
   "name": "@zambezi/grid-components",
-  "version": "0.7.0-update-integration.5",
+  "version": "0.7.0-drag-selection-work.1",
   "description": "Components for the Zambezi Grids",
   "keywords": [
     "d3",
