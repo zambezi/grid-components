@@ -37,7 +37,6 @@ export function createEditCell() {
     draw()
 
     function startExternalEdit(cell, initValue) {
-
       const eventColumn = cell.column
           , eventRow = cell.row
           , isTargetRowEditable = editable.call(this, cell)

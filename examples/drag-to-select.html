@@ -12,25 +12,34 @@
 
 <div class="grid-target"></div>
 
+<pre id="out" />
+
 <script>
 
 const rows = _.range(1, 500).map(faker.Helpers.createCard)
+    , out = d3.select('#out')
+    , highlight = gridComponents.createHighlightActiveCell()
     , table = grid.createGrid()
           .columns(
             [
               { key: 'name', width: 200 }
             , { key: 'username' }
-            , { key: 'email', locked: 'left' }
+            , { key: 'email' }
             , {
                 label: 'some synthetic column'
               , format: r => `${r.username.slice(0, 3)} -- ${r.address.city}`
               , sort: (a, b) => d3.ascending(a.name, b.name)
               }
-            , { key: 'phone', locked: 'right' }
+            , { key: 'phone' }
             , { label: 'changed', format: () => _.uniqueId('ch:') }
             ]
           )
-          .usePre(gridComponents.createCellSelection())
+          .usePre(
+            gridComponents.createCellSelection()
+                .on('cell-active-change.log', d => out.text(`selected ${d.row.name} [${d.column.id}]`))
+                .on('cell-active-change.highlight', highlight.activeCell)
+          )
+          .use(highlight)
 
     , target = d3.select('.grid-target')
           .style('height', '500px')
