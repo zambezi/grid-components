@@ -1,3 +1,4 @@
+import { createCellDragBehaviour } from './cell-drag-behaviour'
 import { dispatch  as createDispatch }  from 'd3-dispatch'
 import { modulo } from '@zambezi/fun'
 import { rebind, keyCodeHandler } from '@zambezi/d3-utils'
@@ -19,6 +20,7 @@ export function createCellSelection() {
         )
       , pasteId = uniqueId('paste.')
       , copyId = uniqueId('copy.')
+      , cellDragBehaviour = createCellDragBehaviour()
 
   let gesture = 'click'
     , selected = []
@@ -99,6 +101,7 @@ export function createCellSelection() {
         , rows = bundle.rows
         , columnById = indexBy(columns, 'id')
 
+    setupDragEvents()
     setupPasteEvents()
     setupCopyEvents()
     setupKeyboardNavEvents()
@@ -121,7 +124,6 @@ export function createCellSelection() {
     }
 
     function moveVertical(step, rows) {
-
       if (!active) return
 
       const { column, row } = active
@@ -188,6 +190,15 @@ export function createCellSelection() {
       select(document)
           .on(pasteId, trackPaste ? onPaste : null)
           .on(`keypress.${pasteId}`, trackPaste ? onPaste : null)
+    }
+
+    function setupDragEvents() {
+      target.call(
+        cellDragBehaviour
+            .on('dragstart', d => console.log('drag start', d))
+            .on('dragend', d => console.log('drag end', d))
+            .on('dragover', d => console.log('drag over', d))
+      )
     }
 
     function setupCopyEvents() {

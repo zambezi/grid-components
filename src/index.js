@@ -1,5 +1,5 @@
+export { createCellDragBehaviour } from './cell-drag-behaviour'
 export { createCellSelection } from './cell-selection'
-export { createDragToSelect } from './drag-to-select'
 export { createEditCell } from './edit-cell'
 export { createEditCellValue } from './edit-cell-value'
 export { createHighlightActiveCell } from './highlight-active-cell'
