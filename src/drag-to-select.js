@@ -3,10 +3,13 @@ import { select, event } from 'd3-selection'
 
 export function createDragToSelect() {
 
-  const drag = createDrag()
+  const cellSelector = '.zambezi-grid-cell'
+      , maxParentCheckJumps = 3
+      , drag = createDrag()
             .on('start.log', d => console.log('START', d))
-            .on('drag', onDrag)
             .on('end.log', d => console.log('END', d))
+
+  let isDragging = false
 
   function dragToSelect(s) {
     s.each(dragToSelectEach)
@@ -14,16 +17,31 @@ export function createDragToSelect() {
 
   return dragToSelect
 
-  function onDrag(d, i) {
-    console.log('on drag', d, document.elementFromPoint(event.x, event.y))
+  function dragToSelectEach({ dispatcher, scroll, columns }) {
+    dispatcher.on('cell-enter.drag-to-select', configureDragBehaviour)
   }
 
-  function dragToSelectEach({ dispatcher }) {
-    dispatcher.on('cell-enter.log', d => console.log('on cell enter', d))
-        .on('cell-enter.drag-to-select', setupDragEvents)
+  function configureDragBehaviour() {
+    select(this)
+        .call(drag)
+        .on('mouseenter.drag-to-select', onMouseEnter)
+        .on('mouseout.drag-to-select', onMouseOut)
   }
 
-  function setupDragEvents() {
-    select(this).call(drag)
+  function onMouseEnter() {
+    if (!isDragging) return
+    console.log('onMouseEnter', d)
+  }
+
+  function onMouseOut() {
+    if (!isDragging) return
+    console.log('onMouseOut', d)
+  }
+
+  function findParentCell(dom, depth=0) {
+    if (!dom) return null
+    if (depth > maxParentCheckJumps) return null
+    if (select(dom).filter(cellSelector).size()) return dom
+    return findParentCell(dom.parentElement, depth++)
   }
 }

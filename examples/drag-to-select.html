@@ -11,13 +11,11 @@
 <script src="../node_modules/@zambezi/grid/dist/grid.js"></script>
 <script src="../dist/grid-components.js"></script>
 
+<h1>〄</h1>
 
-<h1>drag to select</h1>
 <div class="grid-target"></div>
 
-
 <script>
-
 
 const rows = _.range(1, 500).map(faker.Helpers.createCard)
     , table = grid.createGrid()
@@ -25,13 +23,13 @@ const rows = _.range(1, 500).map(faker.Helpers.createCard)
             [
               { key: 'name', width: 200 }
             , { key: 'username' }
-            , { key: 'email' }
+            , { key: 'email', locked: 'left' }
             , {
                 label: 'some synthetic column'
               , format: r => `${r.username.slice(0, 3)} -- ${r.address.city}`
               , sort: (a, b) => d3.ascending(a.name, b.name)
               }
-            , { key: 'phone' }
+            , { key: 'phone', locked: 'right' }
             , { label: 'changed', format: () => _.uniqueId('ch:') }
             ]
           )
@@ -42,6 +40,4 @@ const rows = _.range(1, 500).map(faker.Helpers.createCard)
           .datum(rows)
           .call(table)
 
-
 </script>
-
