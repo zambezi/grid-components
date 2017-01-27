@@ -31,6 +31,7 @@ export function createCellSelection() {
     , selectable = true
     , trackPaste = true
     , typeToActivate = true
+    , lastOverCell
 
   function cellSelection(s) {
     s.each(cellSelectionEach)
@@ -194,15 +195,28 @@ export function createCellSelection() {
     function setupDragEvents() {
       target.call(
         cellDragBehaviour
-            .on('dragstart.set-active', mouseSelection)
-            .on('dragend.log', d => console.log('drag end', d))
-            .on('dragover.log', d => console.log('drag over', d))
+            .on('dragstart.select', d => mouseSelection(d))
+            .on('dragstart.active', setActive)
+            .on('dragstart.redraw', () => target.dispatch('redraw', { bubbles: true }))
+
+            .on('dragend.log', d => console.log('end the drag', d))
+            .on('dragend.set-active', activateLastCell)
+            .on('dragend.redraw', () => target.dispatch('redraw', { bubbles: true }))
+
+            .on('dragover.select', d => mouseSelection(d, true))
+            .on('dragover.cache', d => lastOverCell = d)
+            .on('dragover.redraw', () => target.dispatch('redraw', { bubbles: true }))
       )
     }
 
-    function onDragStart(d) {
-      console.log('onDragStart', d)
-      setActive(d)
+    function activateLastCell() {
+      if (!lastOverCell) return
+      setActive(lastOverCell)
+      lastOverCell = null
+    }
+
+    function mouseBlockSelect(cell) {
+      setSelectionToRange(active, cell)
       target.dispatch('redraw', { bubbles: true })
     }
 
@@ -266,17 +280,15 @@ export function createCellSelection() {
       event.preventDefault()
     }
 
-    function mouseSelection(d, i) {
+    function mouseSelection(d, forceAppend) {
       const column = d.column
           , columnId = column.id
           , set = selectedRowsByColumnId[columnId]
           , row = unwrap(d.row)
-          , { shiftKey, ctrlKey } = event.sourceEvent
+          , { shiftKey, ctrlKey } = event.sourceEvent ? event.sourceEvent : event
           , cell = { row, column }
           , isAlreadySelected = set && set.has(row)
           , hasActive = !!active
-
-      console.log('event', event)
 
       if (selectable) {
         switch(true) {
@@ -284,7 +296,7 @@ export function createCellSelection() {
             addRangeToSelection(active, cell)
             break
 
-          case shiftKey && hasActive:
+          case forceAppend || shiftKey && hasActive:
             setSelectionToRange(active, cell)
             break
 
@@ -303,12 +315,16 @@ export function createCellSelection() {
         selected = compileSelected()
         dispatch.call('cell-selected-change', this, selected, active)
       }
-
-      setActive(cell)
-      target.dispatch('redraw', { bubbles: true })
     }
 
-    function setActive({ row, column}) {
+    function setActive(cell) {
+
+      if (!cell) {
+        active = null
+        return
+      }
+
+      const { row, column } = cell
       active = { row: unwrap(row), column }
       dispatch.call('cell-active-change', this, active)
     }
