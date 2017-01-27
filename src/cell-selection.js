@@ -345,9 +345,9 @@ export function createCellSelection() {
             , columns.indexOf(b.column)
             )
           , rowRange = rangeFromUnorderedIndices(
-              rows
-            , findIndex(rows, r => unwrap(r) == a.row)
-            , findIndex(rows, r => unwrap(r) == b.row)
+              bundle.rows
+            , findIndex(bundle.rows, r => unwrap(r) == a.row)
+            , findIndex(bundle.rows, r => unwrap(r) == b.row)
             ).map(unwrap)
 
       return rowRange.reduce(allCellsInColumns, [])
@@ -414,4 +414,3 @@ function isASpecialKey(key) {
 function areSameCell(a, b) {
   return a && b && unwrap(a.row) == unwrap(b.row) && a.column == b.column
 }
-
