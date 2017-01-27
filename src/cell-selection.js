@@ -109,7 +109,6 @@ export function createCellSelection() {
     if (selectedCandidates) updateFromCandidates()
 
     bundle.dispatcher
-        .on('cell-enter.cell-selection', onCellEnter)
         .on('cell-update.cell-selection', onCellUpdate)
 
     function moveHorizontal(step) {
@@ -195,10 +194,16 @@ export function createCellSelection() {
     function setupDragEvents() {
       target.call(
         cellDragBehaviour
-            .on('dragstart', d => console.log('drag start', d))
-            .on('dragend', d => console.log('drag end', d))
-            .on('dragover', d => console.log('drag over', d))
+            .on('dragstart.set-active', mouseSelection)
+            .on('dragend.log', d => console.log('drag end', d))
+            .on('dragover.log', d => console.log('drag over', d))
       )
+    }
+
+    function onDragStart(d) {
+      console.log('onDragStart', d)
+      setActive(d)
+      target.dispatch('redraw', { bubbles: true })
     }
 
     function setupCopyEvents() {
@@ -261,48 +266,46 @@ export function createCellSelection() {
       event.preventDefault()
     }
 
-    function onCellEnter(d, i) {
-      select(this).on('click.cell-selection', onClick)
-    }
-
-    function onClick(d, i) {
+    function mouseSelection(d, i) {
       const column = d.column
           , columnId = column.id
           , set = selectedRowsByColumnId[columnId]
           , row = unwrap(d.row)
-          , { shiftKey, ctrlKey } = event
-          , target = { row, column }
+          , { shiftKey, ctrlKey } = event.sourceEvent
+          , cell = { row, column }
           , isAlreadySelected = set && set.has(row)
           , hasActive = !!active
+
+      console.log('event', event)
 
       if (selectable) {
         switch(true) {
           case ctrlKey && shiftKey && hasActive:
-            addRangeToSelection(active, target)
+            addRangeToSelection(active, cell)
             break
 
           case shiftKey && hasActive:
-            setSelectionToRange(active, target)
+            setSelectionToRange(active, cell)
             break
 
           case ctrlKey && isAlreadySelected:
-            removeFromSelected(target)
+            removeFromSelected(cell)
             break
 
           case ctrlKey:
-            addToSelected(target)
+            addToSelected(cell)
             break
 
           default:
-            selectOnly(target)
+            selectOnly(cell)
         }
 
         selected = compileSelected()
         dispatch.call('cell-selected-change', this, selected, active)
       }
 
-      setActive(target)
-      select(this).dispatch('redraw', { bubbles: true })
+      setActive(cell)
+      target.dispatch('redraw', { bubbles: true })
     }
 
     function setActive({ row, column}) {
