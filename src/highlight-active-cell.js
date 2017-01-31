@@ -12,7 +12,6 @@ const highlightContainer = appendIfMissing('div.active-cell-highlight.zambezi-gr
 export function createHighlightActiveCell() {
   let activeCell
     , rowIndex
-    , columnClass
 
   function highlightActiveCell(s) {
     s.each(highlightActiveCellEach)
@@ -28,7 +27,8 @@ export function createHighlightActiveCell() {
   return highlightActiveCell
 
   function highlightActiveCellEach(d, i) {
-    const marker = select(this)
+    const { rowHeight, scroll } = d
+        , marker = select(this)
             .on('data-dirty.invalidate-highlight-active-cell', d => rowIndex = undefined)
           .select('.zambezi-grid-body')
           .select(highlightContainer)
@@ -36,22 +36,22 @@ export function createHighlightActiveCell() {
             .style('position', 'absolute')
             .style('transform', `translate(${-d.scroll.left}px, ${-d.scroll.top}px)`)
 
+
     let wrappedRow
       , columnClass = activeCell ? `c-${activeCell.column.id}` : ''
 
     if (activeCell && isUndefined(rowIndex)) {
       wrappedRow = find(d.rows.free, r => unwrap(r) == activeCell.row)
       rowIndex = wrappedRow && wrappedRow.freeRowNumber
-
       if (!wrappedRow) activeCell = null  // we don't have the row, quit
                                           // searching
     }
 
     marker.datum(`${rowIndex}×${columnClass}`)
-        .select(activePositionChanged)
-        .attr('data-grid-row-index', rowIndex)
-        .attr('class', `marker-box zambezi-grid-row ${columnClass}`)
+      .select(activePositionChanged)
+        .attr('class', `marker-box ${columnClass}`)
+        .style('top', `${rowIndex * rowHeight}px`)
+        .style('height', `${rowHeight}px`)
         .style('display', isUndefined(rowIndex) ? 'none' : null)
-
   }
 }
