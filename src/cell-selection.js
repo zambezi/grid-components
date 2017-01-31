@@ -199,7 +199,6 @@ export function createCellSelection() {
             .on('dragstart.active', setActive)
             .on('dragstart.redraw', () => target.dispatch('redraw', { bubbles: true }))
 
-            .on('dragend.log', d => console.log('end the drag', d))
             .on('dragend.set-active', activateLastCell)
             .on('dragend.redraw', () => target.dispatch('redraw', { bubbles: true }))
 
