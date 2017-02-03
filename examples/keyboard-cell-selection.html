@@ -14,6 +14,21 @@
     background-color: #a00;
   }
 
+  .zambezi-grid .grid-click {
+    height: 14px;
+    margin: 2px;
+    font-size: 9px;
+  }
+
+  .zambezi-grid .grid-check {
+    height:20px;
+  }
+
+  .zambezi-grid-cell.that-check-column .formatted-text {
+    top: -7px;
+    left: 2px;
+  }
+
 </style>
 
 <div class="grid-target"></div>
@@ -62,7 +77,6 @@
             .on('cell-active-change.highlight', highlightActiveCell.activeCell)
             .acceptPasteFrom(d3.selectAll('.external-paste-target').nodes())
 
-
       , editUsername = gridComponents.createEditCellValue()
                         .on('change' , (row, value) => row.username = value.toUpperCase())
                         .editable(isNotASomething)
@@ -86,6 +100,20 @@
                 }
               , { key: 'phone' }
               , { label: 'changed', format: () => _.uniqueId() }
+              , {
+                  label: 'click'
+                , template: `<span><input class="grid-click" type="button" value="〄"></input></span>`
+                , components: [ setupGridClick ]
+                }
+              , {
+                  label: 'check'
+                , key: 'company.name'
+                , template: `<span class="that-check-column"><input class="grid-check" type="checkbox"><span class="formatted-text"></span></input></span>`
+                , components: [ 
+                    function() { d3.select(this).select('input').on('change', d => console.log(`BHPu`, d)) }
+                  , grid.updateTextIfChanged
+                  ]
+                }
               ]
             )
             .usePre(cellSelection)
@@ -116,6 +144,10 @@
       , () => cellSelection.selected([ { row: 1, column: 'username' }, { row: 2, column: 'email'} ])
       )
       .on('click.redraw', () => target.call(table))
+
+  function setupGridClick(d) {
+    d3.select(this).select('input').on('click', console.log.bind(console, 'CLICK!'))
+  }
 
   function rowChangedKey(r) {
     return  `
