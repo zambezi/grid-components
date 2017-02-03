@@ -7,15 +7,21 @@ export function createCellDragBehaviour() {
 
   const cellSelector = '.zambezi-grid-cell'
       , maxParentCheckJumps = 3
-      , drag = createDrag()
-
+      , drag = createDrag().filter(ignoreDragSelector)
       , dispatch = createDispatch('dragover', 'dragstart', 'dragend')
       , api = rebind().from(dispatch, 'on')
 
   let isDragging = false
+    , ignoreSelector = 'input, button'
 
   function cellDragBehaviour(s) {
     s.each(cellDragBehaviourEach)
+  }
+
+  cellDragBehaviour.ignoreSelector = function(value) {
+    if (!arguments.length) return ignoreSelector
+    ignoreSelector = value
+    return ignoreSelector
   }
 
   return api(cellDragBehaviour)
@@ -39,6 +45,10 @@ export function createCellDragBehaviour() {
   function onMouseEnter(d) {
     if (!isDragging) return
     dispatch.call('dragover', this, d)
+  }
+
+  function ignoreDragSelector() {
+    return !select(event.target).filter(ignoreSelector).size()
   }
 
   function findParentCell(dom, depth=0) {

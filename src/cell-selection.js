@@ -205,6 +205,7 @@ export function createCellSelection() {
             .on('dragover.select', d => mouseSelection(d, true))
             .on('dragover.cache', d => lastOverCell = d)
             .on('dragover.redraw', () => target.dispatch('redraw', { bubbles: true }))
+
       )
     }
 
