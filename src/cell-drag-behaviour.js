@@ -13,15 +13,22 @@ export function createCellDragBehaviour() {
 
   let isDragging = false
     , ignoreSelector = 'input, button'
+    , debugIgnoreSelector = false
 
   function cellDragBehaviour(s) {
     s.each(cellDragBehaviourEach)
   }
 
+  cellDragBehaviour.debugIgnoreSelector = function(value) {
+    if (!arguments.length) return debugIgnoreSelector
+    debugIgnoreSelector = value
+    return cellDragBehaviour
+  }
+
   cellDragBehaviour.ignoreSelector = function(value) {
     if (!arguments.length) return ignoreSelector
     ignoreSelector = value
-    return ignoreSelector
+    return cellDragBehaviour
   }
 
   return api(cellDragBehaviour)
@@ -48,7 +55,14 @@ export function createCellDragBehaviour() {
   }
 
   function ignoreDragSelector() {
-    return !select(event.target).filter(ignoreSelector).size()
+    const ignore = select(event.target).filter(ignoreSelector).size()
+    if (debugIgnoreSelector) {
+      console.log(
+        ignore ? 'ignore selection on' 
+      : 'accept selection on', event.target
+      )
+    }
+    return !ignore
   }
 
   function findParentCell(dom, depth=0) {

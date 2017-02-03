@@ -21,6 +21,10 @@ export function createCellSelection() {
       , pasteId = uniqueId('paste.')
       , copyId = uniqueId('copy.')
       , cellDragBehaviour = createCellDragBehaviour()
+      , api = rebind()
+            .from(dispatch, 'on')
+            .from(cellDragBehaviour, 'ignoreSelector')
+            .from(cellDragBehaviour, 'debugIgnoreSelector')
 
   let gesture = 'click'
     , selected = []
@@ -94,7 +98,7 @@ export function createCellSelection() {
     return key
   }
 
-  return rebind().from(dispatch, 'on')(cellSelection)
+  return api(cellSelection)
 
   function cellSelectionEach(bundle, i) {
     const target = select(this)
