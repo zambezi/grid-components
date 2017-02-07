@@ -151,43 +151,20 @@ export function createCellSelection() {
     }
 
     function consolidateSelection() {
-
-      console.log('consolidate selection')
       selectionConsolidationNeeded = false
       if (selectionKey === defaultSelectionKey) return
-
       const newRowByOldRow = new Map()
-
       selectedCandidates = (selected || []).reduce(updateRowFromSelectionKey, [])
-
-      console.log('update selection from rows', selectedRowsByColumnId, selected, selectedCandidates)
-
       function updateRowFromSelectionKey(acc, {column, row}) {
-
-        console.log('update row for', row)
-
         const rowSeen = newRowByOldRow.has(row)
-
         let newRow = newRowByOldRow.get(row)
-
-        if (rowSeen) console.log('cache hit', newRow)
-        else console.log('cache miss')
-
-        if (rowSeen && !newRow) { 
-          console.log('new row not found, skip cell')
-          return acc
-        }
-
+        if (rowSeen && !newRow) return acc
         if (!newRow) {
           newRow = find(rows, r => selectionKey(r) === selectionKey(row))
-          if (newRow) console.log('found new row for old row', newRow)
-          else console.log('couldnt find new row for old row')
-
           newRowByOldRow.set(row, newRow)
         }
 
         if (newRow) acc.push({column, row: newRow})
-
         return acc
       }
     }
