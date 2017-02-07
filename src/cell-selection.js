@@ -2,7 +2,7 @@ import { createCellDragBehaviour } from './cell-drag-behaviour'
 import { dispatch  as createDispatch }  from 'd3-dispatch'
 import { modulo } from '@zambezi/fun'
 import { rebind, keyCodeHandler } from '@zambezi/d3-utils'
-import { reduce, indexBy, findIndex, range, debounce, map, uniqueId } from 'underscore'
+import { reduce, indexBy, find, findIndex, range, debounce, map, uniqueId } from 'underscore'
 import { select, event } from 'd3-selection'
 import { someResult as some } from '@zambezi/fun'
 import { unwrap } from '@zambezi/grid'
@@ -25,6 +25,7 @@ export function createCellSelection() {
             .from(dispatch, 'on')
             .from(cellDragBehaviour, 'ignoreSelector')
             .from(cellDragBehaviour, 'debugIgnoreSelector')
+      , defaultSelectionKey = d => d
 
   let gesture = 'click'
     , selected = []
@@ -36,6 +37,8 @@ export function createCellSelection() {
     , trackPaste = true
     , typeToActivate = true
     , lastOverCell
+    , selectionKey = defaultSelectionKey
+    , rowUpdateNeeded = true
 
   function cellSelection(s) {
     s.each(cellSelectionEach)
@@ -81,6 +84,7 @@ export function createCellSelection() {
   cellSelection.rowChangedKey = function(targetRow) {
     const unwrappedRow = unwrap(targetRow)
         , selectedColumnIds = []
+
     let key = ''
 
     selected.forEach(addSelected)
@@ -92,16 +96,23 @@ export function createCellSelection() {
 
     key = selectedColumnIds.join('↑')
 
-    if (active && unwrappedRow === active.row) {
+    if (active && selectionKey(unwrappedRow) === selectionKey(active.row)) {
       key += ('☆' + active.column.id)
     }
     return key
+  }
+
+  cellSelection.selectionKey = function(value) {
+    if (!arguments.length) return selectionKey
+    selectionKey = value
+    return cellSelection
   }
 
   return api(cellSelection)
 
   function cellSelectionEach(bundle, i) {
     const target = select(this)
+            .on('data-dirty.cell-selection', () => rowUpdateNeeded = true)
         , columns = bundle.columns
         , rows = bundle.rows
         , columnById = indexBy(columns, 'id')
@@ -111,6 +122,7 @@ export function createCellSelection() {
     setupCopyEvents()
     setupKeyboardNavEvents()
 
+    if (rowUpdateNeeded) updateRowsFromKeys()
     if (selectedCandidates) updateFromCandidates()
 
     bundle.dispatcher
@@ -131,11 +143,30 @@ export function createCellSelection() {
       if (!active) return
 
       const { column, row } = active
-          , currentRowIndex = findIndex(rows, r => unwrap(r) === row)
+          , currentRowIndex = findIndex(rows, r => selectionKey(unwrap(r)) === selectionKey(row))
           , newRow = rows[modulo(currentRowIndex + step, rows.length)]
 
       setActive({ row: newRow, column })
       target.dispatch('redraw', { bubbles: true })
+    }
+
+    function updateRowsFromKeys() {
+      rowUpdateNeeded = false
+      if (selectionKey === defaultSelectionKey) return
+      const newRowByOldRow = new Map()
+      selectedCandidates = (selected || []).reduce(updateRowFromSelectionKey, [])
+      function updateRowFromSelectionKey(acc, {column, row}) {
+        const rowSeen = newRowByOldRow.has(row)
+        let newRow = newRowByOldRow.get(row)
+        if (rowSeen && !newRow) return acc
+        if (!newRow) {
+          newRow = find(rows, r => selectionKey(r) === selectionKey(row))
+          newRowByOldRow.set(row, newRow)
+        }
+
+        if (newRow) acc.push({column, row: newRow})
+        return acc
+      }
     }
 
     function setActiveIfNone(d) {
