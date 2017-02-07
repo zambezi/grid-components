@@ -38,7 +38,7 @@ export function createCellSelection() {
     , typeToActivate = true
     , lastOverCell
     , selectionKey = defaultSelectionKey
-    , selectionConsolidationNeeded = true
+    , rowUpdateNeeded = true
 
   function cellSelection(s) {
     s.each(cellSelectionEach)
@@ -112,7 +112,7 @@ export function createCellSelection() {
 
   function cellSelectionEach(bundle, i) {
     const target = select(this)
-            .on('data-dirty.cell-selection', () => selectionConsolidationNeeded = true)
+            .on('data-dirty.cell-selection', () => rowUpdateNeeded = true)
         , columns = bundle.columns
         , rows = bundle.rows
         , columnById = indexBy(columns, 'id')
@@ -122,7 +122,7 @@ export function createCellSelection() {
     setupCopyEvents()
     setupKeyboardNavEvents()
 
-    if (selectionConsolidationNeeded) consolidateSelection()
+    if (rowUpdateNeeded) updateRowsFromKeys()
     if (selectedCandidates) updateFromCandidates()
 
     bundle.dispatcher
@@ -150,8 +150,8 @@ export function createCellSelection() {
       target.dispatch('redraw', { bubbles: true })
     }
 
-    function consolidateSelection() {
-      selectionConsolidationNeeded = false
+    function updateRowsFromKeys() {
+      rowUpdateNeeded = false
       if (selectionKey === defaultSelectionKey) return
       const newRowByOldRow = new Map()
       selectedCandidates = (selected || []).reduce(updateRowFromSelectionKey, [])
