@@ -37,7 +37,7 @@ export function createCellSelection() {
     , trackPaste = true
     , typeToActivate = true
     , lastOverCell
-    , selectionKey = defaultSelectionKey
+    , rowSelectionKey = defaultSelectionKey
     , rowUpdateNeeded = true
 
   function cellSelection(s) {
@@ -96,15 +96,15 @@ export function createCellSelection() {
 
     key = selectedColumnIds.join('↑')
 
-    if (active && selectionKey(unwrappedRow) === selectionKey(active.row)) {
+    if (active && rowSelectionKey(unwrappedRow) === rowSelectionKey(active.row)) {
       key += ('☆' + active.column.id)
     }
     return key
   }
 
-  cellSelection.selectionKey = function(value) {
-    if (!arguments.length) return selectionKey
-    selectionKey = value
+  cellSelection.rowSelectionKey = function(value) {
+    if (!arguments.length) return rowSelectionKey
+    rowSelectionKey = value
     return cellSelection
   }
 
@@ -143,7 +143,7 @@ export function createCellSelection() {
       if (!active) return
 
       const { column, row } = active
-          , currentRowIndex = findIndex(rows, r => selectionKey(unwrap(r)) === selectionKey(row))
+          , currentRowIndex = findIndex(rows, r => rowSelectionKey(unwrap(r)) === rowSelectionKey(row))
           , newRow = rows[modulo(currentRowIndex + step, rows.length)]
 
       setActive({ row: newRow, column })
@@ -152,7 +152,7 @@ export function createCellSelection() {
 
     function updateRowsFromKeys() {
       rowUpdateNeeded = false
-      if (selectionKey === defaultSelectionKey) return
+      if (rowSelectionKey === defaultSelectionKey) return
       const newRowByOldRow = new Map()
       selectedCandidates = (selected || []).reduce(updateRowFromSelectionKey, [])
       function updateRowFromSelectionKey(acc, {column, row}) {
@@ -160,7 +160,7 @@ export function createCellSelection() {
         let newRow = newRowByOldRow.get(row)
         if (rowSeen && !newRow) return acc
         if (!newRow) {
-          newRow = find(rows, r => selectionKey(r) === selectionKey(row))
+          newRow = find(rows, r => rowSelectionKey(r) === rowSelectionKey(row))
           newRowByOldRow.set(row, newRow)
         }
 
