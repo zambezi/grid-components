@@ -1,5 +1,8 @@
-import { select } from 'd3-selection'
+import { appendIfMissing, selectionChanged }  from '@zambezi/d3-utils'
 import { findIndex } from 'underscore'
+import { select } from 'd3-selection'
+
+const highlightContainer = appendIfMissing('div.selected-cells-highlight.zambezi-grid-overlay')
 
 export function createHighlightSelectedCells() {
 
@@ -20,12 +23,16 @@ export function createHighlightSelectedCells() {
   return highlightSelectedCells
 
   function highlightSelectedCellsEach(bundle) {
-    const target = select(this)
+    const { columns, rows, scroll } = bundle
+        , target = select(this)
               .on(
                 'data-dirty.highlight-selected-cells',
                 () => borderCache = null
               )
-        , { columns, rows } = bundle
+            .select(highlightContainer)
+              .text('HIGHLIGHTCONTAINER')
+              .style('transform', `translate(${-scroll.left}px, ${-scroll.top}px)`)
+
 
     if (!borderCache)  {
       console.log('compile border cache')
