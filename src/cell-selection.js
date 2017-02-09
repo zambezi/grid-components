@@ -6,6 +6,7 @@ import { reduce, indexBy, find, findIndex, range, debounce, map, uniqueId } from
 import { select, event } from 'd3-selection'
 import { someResult as some } from '@zambezi/fun'
 import { unwrap } from '@zambezi/grid'
+import clipboard from 'clipboard-js'
 
 import './cell-selection.css'
 
@@ -287,7 +288,11 @@ export function createCellSelection() {
         // oh oh, smells like IE
         if (!event.ctrlKey) return
         if (event.key !== 'v') return
-        clipboardData = window.clipboardData
+        clipboard.paste()
+            .then(onIEPaste)
+            .catch(onIEPasteError)
+
+        return
       }
 
       try {
@@ -297,6 +302,14 @@ export function createCellSelection() {
       }
 
       dispatch.call('cell-active-paste', targetNode, active, text)
+
+      function onIEPaste(text) {
+        dispatch.call('cell-active-paste', targetNode, active, text)
+      }
+
+      function onIEPasteError(e) {
+        console.error('Unable to paste on IE', e)
+      }
     }
 
     function activateFromInput(d) {
