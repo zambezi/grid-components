@@ -1,7 +1,7 @@
 import { createCellDragBehaviour } from './cell-drag-behaviour'
 import { dispatch  as createDispatch }  from 'd3-dispatch'
 import { modulo } from '@zambezi/fun'
-import { rebind, keyCodeHandler } from '@zambezi/d3-utils'
+import { rebind, keyCodeHandler, appendIfMissing } from '@zambezi/d3-utils'
 import { reduce, indexBy, find, findIndex, range, debounce, map, uniqueId } from 'underscore'
 import { select, event } from 'd3-selection'
 import { someResult as some } from '@zambezi/fun'
@@ -18,7 +18,7 @@ export function createCellSelection() {
         , 'cell-active-copy'
         , 'cell-active-paste'
         )
-      , pasteId = uniqueId('paste.')
+      , clipboardKeydown = uniqueId('keydown.clipboard.')
       , copyId = uniqueId('copy.')
       , cellDragBehaviour = createCellDragBehaviour()
       , api = rebind()
@@ -26,6 +26,7 @@ export function createCellSelection() {
             .from(cellDragBehaviour, 'ignoreSelector')
             .from(cellDragBehaviour, 'debugIgnoreSelector')
       , defaultSelectionKey = d => d
+      , clipboardProxy = appendIfMissing('textarea.zambezi-grid-clipboard-proxy')
 
   let gesture = 'click'
     , selected = []
@@ -223,8 +224,7 @@ export function createCellSelection() {
 
     function setupPasteEvents() {
       select(document)
-          .on(pasteId, trackPaste ? onPaste : null)
-          .on(`keypress.${pasteId}`, trackPaste ? onPaste : null)
+          .on(clipboardKeydown, trackPaste ? onClipboardMaybe : null)
     }
 
     function setupDragEvents() {
@@ -264,8 +264,8 @@ export function createCellSelection() {
       const targetNode = target.node()
           , { ctrlKey, key } = event
 
-      if (key !== 'c') return 
-      if (!ctrlKey) return 
+      if (!ctrlKey) return
+      if (key !== 'c') return
       if (!targetNode.contains(document.activeElement)) return
 
       event.preventDefault()
@@ -274,29 +274,30 @@ export function createCellSelection() {
       dispatch.call('cell-active-copy', targetNode, active, selected)
     }
 
-    function onPaste() {
+    function onClipboardMaybe() {
+
       const targetNode = target.node()
           , allAcceptedNodes = (acceptPasteFrom || []).concat(targetNode)
+          , { ctrlKey } = event
 
       if (!allAcceptedNodes.some(n => n.contains(document.activeElement))) return
+      if (!ctrlKey) return
 
-      let clipboardData = event.clipboardData
-      let text = ''
+      const clip = select(document.body)
+              .select(clipboardProxy)
+                .on('paste.cell-selection', onPaste)
+                .on('copy.cell-selection', onCopy)
 
-      if (!clipboardData) {
-        // oh oh, smells like IE
-        if (!event.ctrlKey) return
-        if (event.key !== 'v') return
-        clipboardData = window.clipboardData
+      clip.node().focus()
+      clip.node().select()
+
+      function onPaste() {
+        console.log('onPaste', this)
       }
 
-      try {
-        text = clipboardData.getData('Text')
-      } catch(e) {
-        console.warn('Unable to extract clipboard data', e)
+      function onCopy() {
+        console.log('onCopy', this)
       }
-
-      dispatch.call('cell-active-paste', targetNode, active, text)
     }
 
     function activateFromInput(d) {

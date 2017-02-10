@@ -9,3 +9,16 @@
 .zambezi-grid-cell.is-active.editable-cell:hover {
   border: 2px dotted green;
 }
+
+
+.zambezi-grid-clipboard-proxy {
+  position: fixed;
+  width: 30%;
+  height: 30%;
+  top: 0;
+  right: 0;
+  background-color: #300;
+  opacity: 0.5;
+  border: 10px dotted green;
+  color: fuchsia;
+}
