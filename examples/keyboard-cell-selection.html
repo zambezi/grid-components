@@ -76,7 +76,7 @@
             .on('cell-active-copy.log', (active, selected) => console.log('COPY on grid', active, selected))
             .on('cell-active-change.highlight', highlightActiveCell.activeCell)
             .acceptPasteFrom(d3.selectAll('.external-paste-target').nodes())
-            .selectionKey(r => r.phone)
+            .rowSelectionKey(r => r.phone)
 
       , editUsername = gridComponents.createEditCellValue()
                         .on('change' , (row, value) => row.username = value.toUpperCase())
