@@ -19,6 +19,7 @@ export function createCellSelection() {
         , 'cell-active-paste'
         )
       , clipboardKeydown = uniqueId('keydown.clipboard.')
+      , clipboardKeyup = uniqueId('keyup.clipboard.')
       , copyId = uniqueId('copy.')
       , cellDragBehaviour = createCellDragBehaviour()
       , api = rebind()
@@ -40,6 +41,7 @@ export function createCellSelection() {
     , lastOverCell
     , rowSelectionKey = defaultSelectionKey
     , rowUpdateNeeded = true
+    , clip
 
   function cellSelection(s) {
     s.each(cellSelectionEach)
@@ -224,7 +226,8 @@ export function createCellSelection() {
 
     function setupPasteEvents() {
       select(document)
-          .on(clipboardKeydown, trackPaste ? onClipboardMaybe : null)
+          .on(clipboardKeydown, trackPaste ? onClipMaybe : null)
+          .on(clipboardKeyup, trackPaste ? onClipAfter : null)
     }
 
     function setupDragEvents() {
@@ -240,7 +243,6 @@ export function createCellSelection() {
             .on('dragover.select', d => mouseSelection(d, true))
             .on('dragover.cache', d => lastOverCell = d)
             .on('dragover.redraw', () => target.dispatch('redraw', { bubbles: true }))
-
       )
     }
 
@@ -274,8 +276,7 @@ export function createCellSelection() {
       dispatch.call('cell-active-copy', targetNode, active, selected)
     }
 
-    function onClipboardMaybe() {
-
+    function onClipMaybe() {
       const targetNode = target.node()
           , allAcceptedNodes = (acceptPasteFrom || []).concat(targetNode)
           , { ctrlKey } = event
@@ -283,21 +284,39 @@ export function createCellSelection() {
       if (!allAcceptedNodes.some(n => n.contains(document.activeElement))) return
       if (!ctrlKey) return
 
-      const clip = select(document.body)
-              .select(clipboardProxy)
-                .on('paste.cell-selection', onPaste)
-                .on('copy.cell-selection', onCopy)
+      clip = select(document.body)
+            .select(clipboardProxy)
+              .on('paste.cell-selection', onPaste)
+              .on('copy.cell-selection', onCopy)
 
       clip.node().focus()
       clip.node().select()
 
       function onPaste() {
-        console.log('onPaste', this)
+        const clipboardData = event.clipboardData || window.clipboardData
+            , text = clipboardData.getData('Text')
+        dispatch.call('cell-active-paste', targetNode, active, text)
+        clip.remove()
       }
 
       function onCopy() {
         console.log('onCopy', this)
       }
+    }
+
+    function onClipAfter() {
+      const targetNode = target.node()
+          , { key } = event
+
+      if (!key == 'Control') return
+
+      if (clip) {
+        clip.remove()
+        clip = null
+      }
+
+      targetNode.focus()
+
     }
 
     function activateFromInput(d) {
