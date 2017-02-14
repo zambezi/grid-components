@@ -42,6 +42,7 @@ export function createCellSelection() {
     , rowSelectionKey = defaultSelectionKey
     , rowUpdateNeeded = true
     , clip
+    , isIEPasting
 
   function cellSelection(s) {
     s.each(cellSelectionEach)
@@ -293,15 +294,18 @@ export function createCellSelection() {
       clip.node().select()
 
       function onPaste() {
-        const clipboardData = event.clipboardData || window.clipboardData
-            , text = clipboardData.getData('Text')
+        const clipboardData = event.clipboardData
+
+        if (!clipboardData) { 
+          isIEPasting = true
+          return
+        }
+
+        const text = clipboardData.getData('Text') 
         dispatch.call('cell-active-paste', targetNode, active, text)
-        clip.remove()
       }
 
-      function onCopy() {
-        console.log('onCopy', this)
-      }
+      function onCopy() { }
     }
 
     function onClipAfter() {
@@ -309,6 +313,11 @@ export function createCellSelection() {
           , { key } = event
 
       if (!key == 'Control') return
+
+      if (isIEPasting) {
+        dispatch.call('cell-active-paste', targetNode, active, clip.property('value'))
+        isIEPasting = false
+      }
 
       if (clip) {
         clip.remove()
