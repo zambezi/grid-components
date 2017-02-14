@@ -13,12 +13,10 @@
 
 .zambezi-grid-clipboard-proxy {
   position: fixed;
-  width: 30%;
-  height: 30%;
-  top: 0;
+  width: 100px;
+  height: 100px;
+  top: -100px;
   right: 0;
-  background-color: #300;
-  opacity: 0.5;
-  border: 10px dotted green;
-  color: fuchsia;
+  opacity: 0.0;
+  overflow: hidden;
 }
