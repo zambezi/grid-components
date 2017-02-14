@@ -1,7 +1,6 @@
 import { appendIfMissing, rebind, keyCodeHandler, createCharacterClassValidator } from '@zambezi/d3-utils'
 import { createEditCell } from './edit-cell'
 import { dispatch as createDispatch } from 'd3-dispatch'
-import { isUndefined } from 'underscore'
 import { select, event } from 'd3-selection'
 import { someResult as some, batch } from '@zambezi/fun'
 
@@ -39,10 +38,7 @@ function createEditValue() {
     let isCancelled
       , isCommited
 
-    const value = !isUndefined(d.tempInput) ? d.tempInput
-                : !isUndefined(d.value)     ? d.value
-                :  ''
-
+    const value = d.tempInput || d.value || ''
         , input = select(this)
             .select(appendInput)
               .classed('error', !d.isValidInput)
