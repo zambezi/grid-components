@@ -7,7 +7,6 @@ import './highlight-selected-cells.css'
 const highlightContainer = appendIfMissing('div.selected-cells-highlight.zambezi-grid-overlay')
 
 export function createHighlightSelectedCells() {
-
   let selectedCells = []
     , borderCache
 
@@ -25,7 +24,7 @@ export function createHighlightSelectedCells() {
   return highlightSelectedCells
 
   function highlightSelectedCellsEach(bundle) {
-    const { columns, rows, scroll } = bundle
+    const { columns, rows, scroll, rowHeight } = bundle
         , container = select(this)
               .on(
                 'data-dirty.highlight-selected-cells',
@@ -51,6 +50,23 @@ export function createHighlightSelectedCells() {
                   .text((d, i) => i)
 
           , exit = update.exit().remove()
+          , merged = update.merge(enter)
+                .each(configureHighlightCell)
+    }
+
+    function configureHighlightCell(d, i) {
+      const { column
+            , columnIndex
+            , hasBottomBorder
+            , hasLeftBorder
+            , hasRightBorder
+            , hasTopBorder
+            , row
+            , rowIndex
+            } = d
+
+      console.log('configureHighlightCell', rowIndex)
+      const cell = select(this).style('top', `${rowIndex * rowHeight}px`)
     }
 
     function compileBorderLayout() {
