@@ -29,10 +29,10 @@ export function createHighlightSelectedCells() {
                 'data-dirty.highlight-selected-cells',
                 () => borderCache = null
               )
+            .select('.zambezi-grid-body')
             .select(highlightContainer)
               .text('HIGHLIGHTCONTAINER')
               .style('transform', `translate(${-scroll.left}px, ${-scroll.top}px)`)
-
 
     if (!borderCache)  {
       console.log('compile border cache')
