@@ -65,8 +65,14 @@ export function createHighlightSelectedCells() {
             , rowIndex
             } = d
 
-      console.log('configureHighlightCell', rowIndex)
-      const cell = select(this).style('top', `${rowIndex * rowHeight}px`)
+      select(this)
+              .style('top', `${rowIndex * rowHeight}px`)
+              .style('height', `${rowHeight}px`)
+              .classed(`c-${column.id}`, true)
+              .classed('has-bottom-border', hasBottomBorder)
+              .classed('has-left-border', hasLeftBorder)
+              .classed('has-top-border', hasTopBorder)
+              .classed('has-right-border', hasRightBorder)
     }
 
     function compileBorderLayout() {
