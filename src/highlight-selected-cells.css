@@ -1,0 +1,8 @@
+.zambezi-grid-cell-highlight {
+  background-color: #300;
+  color: white;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
