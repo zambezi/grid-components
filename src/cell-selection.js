@@ -117,8 +117,7 @@ export function createCellSelection() {
   function cellSelectionEach(bundle, i) {
     const target = select(this)
             .on('data-dirty.cell-selection', () => rowUpdateNeeded = true)
-        , columns = bundle.columns
-        , rows = bundle.rows
+        , { columns, rows } = bundle
         , columnById = indexBy(columns, 'id')
 
     setupDragEvents()

@@ -34,7 +34,7 @@ export function createHighlightActiveCell() {
           .select(highlightContainer)
           .select(markerBox)
             .style('position', 'absolute')
-            .style('transform', `translate(${-d.scroll.left}px, ${-d.scroll.top}px)`)
+            .style('transform', `translate(${-scroll.left}px, ${-scroll.top}px)`)
 
 
     let wrappedRow
