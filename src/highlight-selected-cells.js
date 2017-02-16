@@ -5,10 +5,12 @@ import { select } from 'd3-selection'
 import './highlight-selected-cells.css'
 
 const highlightContainer = appendIfMissing('div.selected-cells-highlight.zambezi-grid-overlay')
+    , borderDirty = selectionChanged()
 
 export function createHighlightSelectedCells() {
   let selectedCells = []
     , borderCache
+    , borderRedrawGen = 0
 
   function highlightSelectedCells(s) {
     s.each(highlightSelectedCellsEach)
@@ -32,36 +34,33 @@ export function createHighlightSelectedCells() {
               )
             .select('.zambezi-grid-body')
             .select(highlightContainer)
-              .text('HIGHLIGHTCONTAINER')
               .style('transform', `translate(${-scroll.left}px, ${-scroll.top}px)`)
 
     if (!borderCache)  {
       borderCache = compileBorderLayout()
+      borderRedrawGen++
     }
 
-    container.call(renderCellHighlights)
+    container.select(borderDirty.key(() => borderRedrawGen))
+        .call(renderCellHighlights)
 
     function renderCellHighlights(s) {
       const update = s.selectAll('.zambezi-grid-cell-highlight')
                 .data(borderCache)
-          , enter = update.enter()
-                .append('span')
-                  .classed('zambezi-grid-cell-highlight', true)
-                  .text((d, i) => i)
-
+          , enter = update.enter().append('span')
           , exit = update.exit().remove()
           , merged = update.merge(enter)
+                .attr('class', null)
+                .classed('zambezi-grid-cell-highlight', true)
                 .each(configureHighlightCell)
     }
 
     function configureHighlightCell(d, i) {
       const { column
-            , columnIndex
             , hasBottomBorder
             , hasLeftBorder
             , hasRightBorder
             , hasTopBorder
-            , row
             , rowIndex
             } = d
 
