@@ -1,4 +1,11 @@
 import { isUndefined, find } from 'underscore'
+import { select } from 'd3-selection'
+import { appendIfMissing } from '@zambezi/d3-utils'
+
+import './gather-rows.css'
+
+const rowLabelClass = 'zambezi-gather-group-label'
+    , rowLabel = appendIfMissing(`span.${rowLabelClass}`)
 
 export function createGatherRows() {
   let groups = []
@@ -7,6 +14,7 @@ export function createGatherRows() {
     , expandedByDefault = false
     , defaultExpanded = true
     , defaultPredicate = () => true
+    , renderLabel = true
 
   function gatherRows(s) {
     s.each(gatherRowsEach)
@@ -34,8 +42,10 @@ export function createGatherRows() {
   return gatherRows
 
   function gatherRowsEach(d, i) {
+    const { dispatcher } = d
     if (!cache) cache = d.rows.reduce(gather, groups.map(completeMissingFields))
     d.rows = cache
+    dispatcher.on('row-update.gather-rows', onRowUpdate)
   }
 
   function gather(targets, row) {
@@ -48,7 +58,21 @@ export function createGatherRows() {
   function completeMissingFields(group) {
     group.predicate = group.predicate || defaultPredicate
     group.children = []
+    group.isGroupRow = true
     if (isUndefined(group.expanded)) group.expanded = defaultExpanded
     return group
+  }
+
+  function onRowUpdate({ row }) {
+    const { label, isGroupRow } = row
+        , target = select(this)
+        , classed = target.classed('is-gather-group-row')
+
+    if (classed !== isGroupRow) target.classed('is-gather-group-row', isGroupRow)
+    if (!isGroupRow || !renderLabel)  {
+      target.select(`.${rowLabelClass}`).remove()
+    } else { 
+      target.select(rowLabel).text(label)
+    }
   }
 }
