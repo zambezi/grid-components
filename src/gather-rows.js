@@ -1,15 +1,30 @@
-import { clone, find } from 'underscore'
+import { isUndefined, find } from 'underscore'
 
-const defaultPredicate = () => true
 
 export function createGatherRows() {
 
   let groups = []
     , cache
+    , expandedRowByLabel = {}
+    , expandedByDefault = false
+    , defaultExpanded = true
+    , defaultPredicate = () => true
 
   function gatherRows(s) {
     s.each(gatherRowsEach)
         .on('data-dirty.gather-rows', () => cache = null)
+  }
+
+  gatherRows.defaultExpanded = function(value) {
+    if (!arguments.length) return defaultExpanded
+    defaultExpanded = value
+    return gatherRows
+  }
+
+  gatherRows.defaultPredicate = function(value) {
+    if (!arguments.length) return defaultPredicate
+    defaultPredicate = value
+    return gatherRows
   }
 
   gatherRows.groups = function(value) {
@@ -21,22 +36,21 @@ export function createGatherRows() {
   return gatherRows
 
   function gatherRowsEach(d, i) {
-    if (!cache) { 
-      cache = d.rows.reduce(
-        gather, groups.map(
-          d => Object.assign({ children: [], predicate: defaultPredicate }, d)
-        )
-      )
-    }
+    if (!cache) cache = d.rows.reduce(gather, groups.map(completeMissingFields))
     d.rows = cache
-    console.log(cache)
   }
 
   function gather(targets, row) {
     const target = find(targets, t => t.predicate(row))
     if (!target) return targets
     target.children.push(row)
-    target.expanded = true
     return targets
+  }
+
+  function completeMissingFields(group) {
+    group.predicate = group.predicate || defaultPredicate
+    group.children = []
+    if (isUndefined(group.expanded)) group.expanded = defaultExpanded
+    return group
   }
 }

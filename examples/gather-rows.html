@@ -19,20 +19,25 @@
             .groups(
               [
                 {
-                  label: 'Usernames with dots',
-                  predicate:  row => row.username.indexOf('.') >= 0
+                  label: 'Usernames with dots'
+                , predicate:  row => row.username.indexOf('.') >= 0
+                , children: []
                 },
 
                 {
-                  label: 'Usernames with underscores',
-                  predicate:  row => row.username.indexOf('_') >= 0
+                  label: 'Usernames with underscores'
+                , predicate:  row => row.username.indexOf('_') >= 0
+                , children: []
                 },
                 {
                   label: 'Something that does not match on this dataset'
                 , predicate: () => false
+                , children: []
                 },
                 {
                   label: 'Other usernames'
+                , predicate: () => true
+                , children: []
                 }
               ]
             )
