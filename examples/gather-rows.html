@@ -14,51 +14,51 @@
 <script src="../dist/grid-components.js"></script>
 <script>
 
-  var rows = _.range(1, 50).map(faker.Helpers.createCard)
-    , gatherRows = gridComponents.createGatherRows()
-          .groups(
-            [
-              {
-                label: 'Usernames with dots',
-                predicate:  row => row.username.indexOf('.') >= 0
-              },
+  const rows = _.range(1, 50).map(faker.Helpers.createCard)
+      , gatherRows = gridComponents.createGatherRows()
+            .groups(
+              [
+                {
+                  label: 'Usernames with dots',
+                  predicate:  row => row.username.indexOf('.') >= 0
+                },
 
-              {
-                label: 'Usernames with underscores',
-                predicate:  row => row.username.indexOf('_') >= 0
-              },
-              {
-                label: 'Something that does not match on this dataset'
-              , predicate: () => false
-              },
-              {
-                label: 'Other usernames'
-              }
-            ]
-          )
-    , table = grid.createGrid()
-          .columns(
-            [
-              {
-                components: [ grid.createNestedRowExpanders() ]
-              , key: 'label'
-              , label: 'expanders'
-              , width: 100
-              , resizable: false
-              , draggable: false
-              }
+                {
+                  label: 'Usernames with underscores',
+                  predicate:  row => row.username.indexOf('_') >= 0
+                },
+                {
+                  label: 'Something that does not match on this dataset'
+                , predicate: () => false
+                },
+                {
+                  label: 'Other usernames'
+                }
+              ]
+            )
+      , table = grid.createGrid()
+            .columns(
+              [
+                {
+                  components: [ grid.createNestedRowExpanders() ]
+                , key: 'label'
+                , label: 'expanders'
+                , width: 100
+                , resizable: false
+                , draggable: false
+                }
 
-            , { key: 'name', width: 200 }
-            , { key: 'username' }
-            , { key: 'email' }
-            , { key: 'phone' }
-            ]
-          )
-          .usePre(gatherRows)
+              , { key: 'name', width: 200 }
+              , { key: 'username' }
+              , { key: 'email' }
+              , { key: 'phone' }
+              ]
+            )
+            .usePre(gatherRows)
 
-    , target = d3.select('.grid-target')
-          .style('height', '800px')
-          .datum(rows)
-          .call(table)
+      , target = d3.select('.grid-target')
+            .style('height', '800px')
+            .datum(rows)
+            .call(table)
 </script>
 </body>
