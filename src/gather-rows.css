@@ -1,8 +1,13 @@
 .zambezi-grid-row.is-gather-group-row {
-  background-color: #CCC;
+  background-color: #DDD;
 }
 
-.zambezi-grid-row.is-gather-group-row .zambezi-grid-cell{
+.zambezi-grid-row.is-gather-group-row.has-children {
+  background-color: #CACACA;
+  cursor: pointer;
+}
+
+.zambezi-grid-row.is-gather-group-row .zambezi-grid-cell {
   border-right: none;
 }
 
@@ -11,3 +16,22 @@
   left: 8px;
   top: 2px;
 }
+.zambezi-grid-row.is-gather-group-row .zambezi-gather-group-label:before {
+
+  font-size: 14px;
+  font-family: monospace;
+  white-space: pre;
+  color: #555;
+  content: ' ';
+  margin: 4px;
+}
+
+.zambezi-grid-row.is-gather-group-row.is-expand .zambezi-gather-group-label:before {
+  content: '➖';
+}
+
+.zambezi-grid-row.is-gather-group-row.is-collapse .zambezi-gather-group-label:before {
+  content: '➕';
+}
+
+
