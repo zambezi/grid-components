@@ -1,8 +1,6 @@
 import { isUndefined, find } from 'underscore'
 
-
 export function createGatherRows() {
-
   let groups = []
     , cache
     , expandedRowByLabel = {}
