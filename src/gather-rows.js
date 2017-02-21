@@ -7,6 +7,8 @@ import './gather-rows.css'
 
 const rowLabelClass = 'zambezi-gather-group-label'
     , rowLabel = appendIfMissing(`span.${rowLabelClass}`)
+    , rowIcon = appendIfMissing('i.zambezi-group-toggle')
+    , rowTitle = appendIfMissing('span.zambezi-group-title')
 
 export function createGatherRows() {
   let groups = []
@@ -70,6 +72,10 @@ export function createGatherRows() {
         , target = select(this)
         , classed = target.classed('is-gather-group-row')
 
+    let labelTarget
+      , titleTarget
+      , iconTarget
+
     target.classed('is-gather-group-row', isGroupRow)
         .classed('has-children', isGroupRow && children && children.length)
         .classed('is-expand', isGroupRow && children.length && expanded )
@@ -78,7 +84,9 @@ export function createGatherRows() {
     if (!isGroupRow || !renderLabel)  {
       target.select(`.${rowLabelClass}`).remove()
     } else { 
-      target.select(rowLabel).text(label)
+      labelTarget = target.select(rowLabel)
+      iconTarget = labelTarget.select(rowIcon)
+      titleTarget = labelTarget.select(rowTitle).text(label)
     }
 
     target.on('click.gather-rows', isGroupRow ? onRowClick : null)
