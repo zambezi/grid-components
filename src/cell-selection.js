@@ -15,12 +15,10 @@ export function createCellSelection() {
           'cell-selected-change'
         , 'cell-active-action'
         , 'cell-active-change'
-        , 'cell-active-copy'
         , 'cell-active-paste'
         )
       , clipboardKeydown = uniqueId('keydown.clipboard.')
       , clipboardKeyup = uniqueId('keyup.clipboard.')
-      , copyId = uniqueId('copy.')
       , cellDragBehaviour = createCellDragBehaviour()
       , api = rebind()
             .from(dispatch, 'on')

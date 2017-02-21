@@ -74,7 +74,6 @@
             .on('cell-active-action.edit', (cell, initValue) => editUsername.startEdit(cell, initValue))
             .on('cell-active-paste.log', (active, data) => console.log('PASTE on grid', active, data))
             .on('cell-active-paste.render', onPaste)
-            .on('cell-active-copy.log', (active, selected) => console.log('COPY on grid', active, selected))
             .on('cell-active-change.highlight', highlightActiveCell.activeCell)
             .on('cell-selected-change.highlight', highlightSelectedCells.selectedCells)
             .acceptPasteFrom(d3.selectAll('.external-paste-target').nodes())
