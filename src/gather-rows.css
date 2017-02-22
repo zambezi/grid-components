@@ -1,0 +1,37 @@
+.zambezi-grid-row.is-gather-group-row {
+  background-color: #DDD;
+}
+
+.zambezi-grid-row.is-gather-group-row.has-children {
+  background-color: #CACACA;
+  cursor: pointer;
+}
+
+.zambezi-grid-row.is-gather-group-row .zambezi-grid-cell {
+  border-right: none;
+}
+
+.zambezi-grid-row.is-gather-group-row .zambezi-gather-group-label {
+  position: absolute;
+  top: 2px;
+}
+
+.zambezi-grid-row.is-gather-group-row .zambezi-group-toggle:before {
+
+  font-size: 14px;
+  font-style: normal;
+  font-family: monospace;
+  white-space: pre;
+  color: #555;
+  content: ' ';
+  margin: 4px;
+
+}
+
+.zambezi-grid-row.is-gather-group-row.is-expand .zambezi-group-toggle:before {
+  content: '➖';
+}
+
+.zambezi-grid-row.is-gather-group-row.is-collapse .zambezi-group-toggle:before {
+  content: '➕';
+}
