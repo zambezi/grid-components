@@ -1,11 +1,13 @@
-import { rebind, forward } from '@zambezi/d3-utils'
+import { rebind, selectionChanged } from '@zambezi/d3-utils'
 import { select, event } from 'd3-selection'
 import { unwrap } from '@zambezi/grid'
 
 import './row-selection.css'
 
+
 export function createRowSelection() {
 
+  const activeChanged = selectionChanged()
   let active
 
   function rowSelection(s) {
@@ -29,7 +31,7 @@ export function createRowSelection() {
 
   function updateRow({ row }) {
     const isActive = unwrap(row) === active
-    select(this).classed('is-active', isActive)
+    select(this).select(activeChanged.key(() => isActive)).classed('is-active', isActive)
   }
 
   function attachListeners() {
