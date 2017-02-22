@@ -12,6 +12,7 @@ export default {
   , '@zambezi/fun'
   , '@zambezi/grid'
   , 'd3-dispatch'
+  , 'd3-drag'
   , 'd3-selection'
   , 'underscore'
   ]
@@ -30,6 +31,7 @@ export default {
   , '@zambezi/fun': 'fun'
   , '@zambezi/grid': 'grid'
   , 'd3-dispatch': 'd3'
+  , 'd3-drag': 'd3'
   , 'd3-selection': 'd3'
   , 'underscore': '_'
   }

@@ -1,6 +1,6 @@
 {
   "name": "@zambezi/grid-components",
-  "version": "0.7.0-group-gather-work.1",
+  "version": "0.7.0-drag-selection-work.11",
   "description": "Components for the Zambezi Grids",
   "keywords": [
     "d3",
@@ -40,9 +40,11 @@
     "rollup-watch": "^2.5.0"
   },
   "dependencies": {
-    "@zambezi/grid": "^0.13.1",
     "@zambezi/d3-utils": "^3.3.1",
+    "@zambezi/fun": "^2.0.1",
+    "@zambezi/grid": "^0",
     "d3-dispatch": "^1.0.1",
+    "d3-drag": "^1.0.2",
     "d3-selection": "^1.0.0",
     "underscore": "^1.8.3"
   }

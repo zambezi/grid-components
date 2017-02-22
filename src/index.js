@@ -1,7 +1,9 @@
+export { createCellDragBehaviour } from './cell-drag-behaviour'
 export { createCellSelection } from './cell-selection'
 export { createEditCell } from './edit-cell'
 export { createEditCellValue } from './edit-cell-value'
+export { createHighlightActiveCell } from './highlight-active-cell'
+export { createHighlightSelectedCells } from './highlight-selected-cells'
 export { createGatherRows } from './gather-rows'
 export { createPopover } from './popover'
 export { createRunHeaderComponents } from './run-header-components'
-
