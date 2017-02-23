@@ -8,6 +8,7 @@
 
 - Grid components
   - [Cell selection](man/cell-selection.md)
+  - [Row selection](man/row-selection.md)
   - [Run header components](man/run-header-components.md)
   - [Gather rows](man/gather-rows.md)
 
