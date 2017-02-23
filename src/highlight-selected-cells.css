@@ -1,0 +1,24 @@
+.zambezi-grid-cell-highlight {
+  color: #F33;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.8;
+}
+
+.zambezi-grid-cell-highlight.has-bottom-border {
+  border-bottom: 1px solid blue;
+}
+
+.zambezi-grid-cell-highlight.has-left-border {
+  border-left: 1px solid blue;
+}
+
+.zambezi-grid-cell-highlight.has-top-border {
+  border-top: 1px solid blue;
+}
+
+.zambezi-grid-cell-highlight.has-right-border {
+  border-right: 1px solid blue;
+}

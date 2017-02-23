@@ -3,5 +3,20 @@
 }
 
 .zambezi-grid-cell.is-active {
-  border: 2px dotted magenta;
+  border: 2px dotted rgba(255, 0, 255, 0.4);
+}
+
+.zambezi-grid-cell.is-active.editable-cell:hover {
+  border: 2px dotted green;
+}
+
+
+.zambezi-grid-clipboard-proxy {
+  position: fixed;
+  width: 100px;
+  height: 100px;
+  top: -100px;
+  right: 0;
+  opacity: 0.0;
+  overflow: hidden;
 }

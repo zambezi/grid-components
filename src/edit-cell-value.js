@@ -1,8 +1,8 @@
 import { appendIfMissing, rebind, keyCodeHandler, createCharacterClassValidator } from '@zambezi/d3-utils'
 import { createEditCell } from './edit-cell'
 import { dispatch as createDispatch } from 'd3-dispatch'
-import { select } from 'd3-selection'
-import { someResult as some } from '@zambezi/fun'
+import { select, event } from 'd3-selection'
+import { someResult as some, batch } from '@zambezi/fun'
 
 const appendInput = appendIfMissing('input.edit-value')
 
@@ -35,11 +35,15 @@ function createEditValue() {
   return api(editValue)
 
   function editValueEach(d, i) {
+    let isCancelled
+      , isCommited
 
-    const input = select(this)
+    const value = d.tempInput || d.value || ''
+        , input = select(this)
             .select(appendInput)
               .classed('error', !d.isValidInput)
-              .property('value', d.tempInput || '')
+              .property('value' , value)
+              .each(setCursorAtEnd)
               .on('input', () => dispatch.call('partialedit', input.node(), d))
               .on('keypress.valid-character', characterClassValidator)
               .on(
@@ -48,14 +52,39 @@ function createEditValue() {
                     null
                   , keyDownHandlers.concat(
                       [
-                        keyCodeHandler((d) => dispatch.call('commit', input.node(), d), 13)
-                      , keyCodeHandler((d) => dispatch.call('cancel', input.node(), d), 27)
+                        keyCodeHandler(onCancel, 9)  // tab
+                      , keyCodeHandler(batch(stopPropagation, onCancel), 27) // esc
+                      , keyCodeHandler(batch(stopPropagation, onCommit), 13)  // enter
+                      , keyCodeHandler(stopPropagation, 38) // up
+                      , keyCodeHandler(stopPropagation, 40) // down
+                      , keyCodeHandler(stopPropagation, 37) // left
+                      , keyCodeHandler(stopPropagation, 39) // right
                       ]
                     )
                 )
               )
-              .on('blur.process', (d) => dispatch.call('commit', input.node(), d))
+              .on('blur.process', onCommit)
 
     if (d.isValidInput) input.node().focus()
+
+    function stopPropagation() {
+      event.stopPropagation()
+    }
+
+    function setCursorAtEnd(d, i) {
+      this.setSelectionRange(value.length, value.length)
+    }
+
+    function onCommit(d) {
+      if (isCancelled) return
+      if (isCommited) return
+      isCommited = true
+      dispatch.call('commit', input.node(), d)
+    }
+
+    function onCancel(d) {
+      isCancelled = true
+      dispatch.call('cancel', input.node(), d)
+    }
   }
 }
