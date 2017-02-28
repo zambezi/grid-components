@@ -1,0 +1,224 @@
+<!doctype html>
+<head><meta charset="utf-8" /></head>
+<body>
+
+<style>
+  .no-paste-target,
+  .external-paste-target {
+    background-color: #aaa;
+    color: white;
+    height: 200px;
+  }
+
+  .no-paste-target {
+    background-color: #a00;
+  }
+
+  .zambezi-grid .grid-click {
+    height: 14px;
+    margin: 2px;
+    font-size: 9px;
+  }
+
+  .zambezi-grid .grid-check {
+    height:20px;
+  }
+
+  .zambezi-grid-cell.that-check-column .formatted-text {
+    top: -7px;
+    left: 2px;
+  }
+
+</style>
+
+<div class="grid-target"></div>
+
+<p>
+  <button id="clear-selection">clear selection</button>
+  <button id="programmatic-select">programmatically select some cells</button>
+  <button id="programmatic-select-by-indices">programmtically select some cells (using row index and column id)</button>
+</p>
+
+<pre id="output"></pre>
+
+<div tabindex="0" class="external-paste-target">
+  <h1>external paste target</h1>
+</div>
+
+<hr/>
+
+<div tabindex="0" class="no-paste-target">
+  <h1>no paste target</h1>
+</div>
+
+<hr/>
+
+<div tabindex="0" class="external-paste-target">
+  <h1>another paste target</h1>
+</div>
+
+<link rel="stylesheet" type="text/css" href="../node_modules/normalize.css/normalize.css">
+<script src="../node_modules/underscore/underscore.js"></script>
+<script src="../node_modules/d3/build/d3.js"></script>
+<script src="../node_modules/@zambezi/d3-utils/dist/d3-utils.js"></script>
+<script src="../node_modules/@zambezi/fun/dist/fun.js"></script>
+<script src="../node_modules/faker/faker.js"></script>
+<script src="../node_modules/@zambezi/grid/dist/grid.js"></script>
+<script src="../dist/grid-components.js"></script>
+<script>
+
+  const rows = _.range(1, 500).map(faker.Helpers.createCard)
+        highlightActiveCell = gridComponents.createHighlightActiveCell()
+      , highlightSelectedCells = gridComponents.createHighlightSelectedCells()
+      , cellSelection = gridComponents.createCellSelection()
+            .on('cell-active-action.edit', (cell, initValue) => editUsername.startEdit(cell, initValue))
+            .on('cell-active-paste.log', (active, data) => console.log('PASTE on grid', active, data))
+            .on('cell-active-paste.render', onPaste)
+            .on('cell-active-change.highlight', highlightActiveCell.activeCell)
+            .on('cell-selected-change.highlight', highlightSelectedCells.selectedCells)
+            .acceptPasteFrom(d3.selectAll('.external-paste-target').nodes())
+            .rowSelectionKey(r => r.phone)
+
+      , editUsername = gridComponents.createEditCellValue()
+                        .on('change' , (row, value) => row.username = value.toUpperCase())
+                        .editable(isNotASomething)
+                        .on('editend.log', () => console.warn('edit end'))
+                        .on('editend', () => target.node().focus())
+                        .validate(validateUserName)
+
+      , table = grid.createGrid()
+            .columns(
+              [
+                { key: 'name', width: 200 }
+              , {
+                  key: 'username'
+                , components: [ editUsername, grid.updateTextIfChanged ]
+                }
+              , { key: 'email' }
+              , {
+                  label: 'some synthetic column'
+                , format: summary
+                , sort: (a, b) => d3.ascending(a.name, b.name)
+                }
+              , { key: 'phone' }
+              , { label: 'changed', format: () => _.uniqueId() }
+              , {
+                  label: 'click'
+                , template: `<span><input class="grid-click" type="button" value="〄"></input></span>`
+                , components: [ setupGridClick ]
+                }
+              , {
+                  label: 'check'
+                , key: 'company.name'
+                , template: `<span class="that-check-column"><input class="grid-check" type="checkbox"><span class="formatted-text"></span></input></span>`
+                , components: [ 
+                    function() { d3.select(this).select('input').on('change', d => console.log(`BHPu`, d)) }
+                  , grid.updateTextIfChanged
+                  ]
+                }
+              ]
+            )
+            .usePre(cellSelection)
+            .use(highlightActiveCell)
+            .use(highlightSelectedCells)
+            .on('draw.log', onDraw)
+            .rowKey(r => r.phone)
+            .rowChangedKey(rowChangedKey)
+
+      , output = d3.select('#output')
+      , target = d3.select('.grid-target')
+            .style('height', '300px')
+            .datum(rows)
+            .call(table)
+
+  d3.select('#clear-selection')
+      .on('click.reset', () => cellSelection.selected([]).active(null))
+      .on('click.redraw', () => target.call(table))
+
+  d3.select('#programmatic-select')
+      .on('click.clear', () => console.clear())
+      .on('click.reset', () => cellSelection.selected(bunchOfCells()))
+      .on('click.redraw', () => target.call(table))
+
+  d3.select('#programmatic-select-by-indices')
+      .on('click.clear', () => console.clear())
+      .on(
+        'click.reset'
+      , () => cellSelection.selected([ { row: 1, column: 'username' }, { row: 2, column: 'email'} ])
+      )
+      .on('click.redraw', () => target.call(table))
+
+  function setupGridClick(d) {
+    d3.select(this).select('input').on('click', console.log.bind(console, 'CLICK!'))
+  }
+
+  function rowChangedKey(r) {
+    return  `
+
+      ${r.name}
+      ${cellSelection.rowChangedKey(r)}
+      ${editUsername.rowChangedKey(r)}
+
+    `
+  }
+
+  function validateUserName(row, value) {
+    if (!value) return 'Username cannot be empty'
+    if (!value.split('').some(isDifferentCharacter())) return 'Cannot all be the same character'
+  }
+
+  function isDifferentCharacter() {
+    let found
+    return function check(ch) {
+      if (found && !~found.indexOf(ch)) return true
+      found = ch
+      return false
+    }
+  }
+
+  function onDraw() {
+    output.text(horribleBanner(cellSelection.selected(), cellSelection.active()))
+  }
+
+  function onPaste(active, text) {
+    output.text(
+      `Paste event on: ${active ? active.row.username + ':' + active.column.id : '--'}
+
+      ${text}
+
+      \n▒▓ ${ Date.now().toString(32).toUpperCase() }
+      `
+    )
+  }
+
+  function horribleBanner(selected, active) {
+    return `ACTIVE
+    \n${ active ? toRepr(active) : '(no active cell)' }
+    \nSELECTED
+    \n${ selected.map(toRepr).join('\n') }
+
+    \n▒▓ ${ Date.now().toString(32).toUpperCase() }
+    `
+  }
+
+  function bunchOfCells() {
+    return d3.range(
+      _.random(20, 40))
+          .map(() => ({ row: _.sample(rows), column: _.sample(table.columns()) })
+    )
+  }
+
+  function toRepr({column , row}) {
+    return column.id + ' <' + column.format(column.value(row)) + '>'
+  }
+
+  function summary(row) {
+    return `${row.username.slice(0, 3)} -- ${row.address.city}`
+  }
+
+  function isNotASomething(cell) {
+    return cell.row.username.toLowerCase().indexOf('a') !== 0
+  }
+
+</script>
+</body>

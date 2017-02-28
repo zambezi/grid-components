@@ -1,20 +1,46 @@
+import { createCellDragBehaviour } from './cell-drag-behaviour'
 import { dispatch  as createDispatch }  from 'd3-dispatch'
-import { rebind, forward } from '@zambezi/d3-utils'
-import { reduce, indexBy, findIndex, range } from 'underscore'
+import { modulo } from '@zambezi/fun'
+import { rebind, keyCodeHandler, appendIfMissing } from '@zambezi/d3-utils'
+import { reduce, indexBy, find, findIndex, range, debounce, map, uniqueId } from 'underscore'
 import { select, event } from 'd3-selection'
+import { someResult as some } from '@zambezi/fun'
 import { unwrap } from '@zambezi/grid'
 
 import './cell-selection.css'
 
 export function createCellSelection() {
 
-  const dispatch = createDispatch('cell-selected-change')
+  const dispatch = createDispatch(
+          'cell-selected-change'
+        , 'cell-active-action'
+        , 'cell-active-change'
+        , 'cell-active-paste'
+        )
+      , clipboardKeydown = uniqueId('keydown.clipboard.')
+      , clipboardKeyup = uniqueId('keyup.clipboard.')
+      , cellDragBehaviour = createCellDragBehaviour()
+      , api = rebind()
+            .from(dispatch, 'on')
+            .from(cellDragBehaviour, 'ignoreSelector')
+            .from(cellDragBehaviour, 'debugIgnoreSelector')
+      , defaultSelectionKey = d => d
+      , clipboardProxy = appendIfMissing('textarea.zambezi-grid-clipboard-proxy')
 
   let gesture = 'click'
     , selected = []
     , selectedCandidates
     , selectedRowsByColumnId = {}
+    , acceptPasteFrom = []
     , active
+    , selectable = true
+    , trackPaste = true
+    , typeToActivate = true
+    , lastOverCell
+    , rowSelectionKey = defaultSelectionKey
+    , rowUpdateNeeded = true
+    , clip
+    , isIEPasting
 
   function cellSelection(s) {
     s.each(cellSelectionEach)
@@ -27,23 +53,129 @@ export function createCellSelection() {
     return cellSelection
   }
 
+  cellSelection.trackPaste = function(value) {
+    if (!arguments.length) return trackPaste
+    trackPaste = value
+    return cellSelection
+  }
+
+  cellSelection.acceptPasteFrom = function(value) {
+    if (!arguments.length) return acceptPasteFrom
+    acceptPasteFrom = value
+    return cellSelection
+  }
+
+  cellSelection.typeToActivate = function(value) {
+    if (!arguments.length) return typeToActivate
+    typeToActivate = value
+    return cellSelection
+  }
+
+  cellSelection.selectable = function(value) {
+    if (!arguments.length) return selectable
+    selectable = value
+    return cellSelection
+  }
+
   cellSelection.active = function(value) {
     if (!arguments.length) return active
     active = value
     return cellSelection
   }
 
-  return rebind().from(dispatch, 'on')(cellSelection)
+  cellSelection.rowChangedKey = function(targetRow) {
+    const unwrappedRow = unwrap(targetRow)
+        , selectedColumnIds = []
+
+    let key = ''
+
+    selected.forEach(addSelected)
+
+    function addSelected({row, column}) {
+      if (unwrappedRow !== row) return
+      selectedColumnIds.push(column.id)
+    }
+
+    key = selectedColumnIds.join('↑')
+
+    if (active && rowSelectionKey(unwrappedRow) === rowSelectionKey(active.row)) {
+      key += ('☆' + active.column.id)
+    }
+    return key
+  }
+
+  cellSelection.rowSelectionKey = function(value) {
+    if (!arguments.length) return rowSelectionKey
+    rowSelectionKey = value
+    return cellSelection
+  }
+
+  return api(cellSelection)
 
   function cellSelectionEach(bundle, i) {
     const target = select(this)
-        , columnById = indexBy(bundle.columns, 'id')
+            .on('data-dirty.cell-selection', () => rowUpdateNeeded = true)
+        , { columns, rows } = bundle
+        , columnById = indexBy(columns, 'id')
 
+    setupDragEvents()
+    setupPasteEvents()
+    setupKeyboardNavEvents()
+
+    if (rowUpdateNeeded) updateRowsFromKeys()
     if (selectedCandidates) updateFromCandidates()
 
     bundle.dispatcher
-        .on('cell-enter.cell-selection', onCellEnter)
         .on('cell-update.cell-selection', onCellUpdate)
+
+    function moveHorizontal(step) {
+      if (!active) return
+
+      const { column, row } = active
+          , currentColumnIndex = columns.indexOf(column)
+          , newColumn = columns[modulo(currentColumnIndex + step, columns.length)]
+
+      setActive({ row, column: newColumn })
+      target.dispatch('redraw', { bubbles: true })
+    }
+
+    function moveVertical(step, rows) {
+      if (!active) return
+
+      const { column, row } = active
+          , currentRowIndex = findIndex(rows, r => rowSelectionKey(unwrap(r)) === rowSelectionKey(row))
+          , newRow = rows[modulo(currentRowIndex + step, rows.length)]
+
+      setActive({ row: newRow, column })
+      target.dispatch('redraw', { bubbles: true })
+    }
+
+    function updateRowsFromKeys() {
+      rowUpdateNeeded = false
+      if (rowSelectionKey === defaultSelectionKey) return
+      const newRowByOldRow = new Map()
+      selectedCandidates = (selected || []).reduce(updateRowFromSelectionKey, [])
+      function updateRowFromSelectionKey(acc, {column, row}) {
+        const rowSeen = newRowByOldRow.has(row)
+        let newRow = newRowByOldRow.get(row)
+        if (rowSeen && !newRow) return acc
+        if (!newRow) {
+          newRow = find(rows, r => rowSelectionKey(r) === rowSelectionKey(row))
+          newRowByOldRow.set(row, newRow)
+        }
+
+        if (newRow) acc.push({column, row: newRow})
+        return acc
+      }
+    }
+
+    function setActiveIfNone(d) {
+      if (active) return
+      if (!bundle.length) return
+      if (!columns.length) return
+      setActive({ row: bundle[0], column: columns[0] })
+      select(this).dispatch('redraw', { bubbles: true })
+    }
 
     function updateFromCandidates() {
       selectedRowsByColumnId = selectedCandidates.reduce(toRealSelection, {})
@@ -72,47 +204,165 @@ export function createCellSelection() {
       return reduce(selectedRowsByColumnId, toCells, [])
     }
 
-    function onCellEnter(d, i) {
-      select(this).on('click.cell-selection', onClick)
+    function setupKeyboardNavEvents() {
+      target.attr('tabindex', '0')
+          .on('focus', debounce(setActiveIfNone, 200))
+          .on(
+            'keydown.keyboard-cell-selection'
+          , some(
+              keyCodeHandler(() => dispatch.call('cell-active-action', this, active), 13) // enter
+            , keyCodeHandler(d => moveVertical(-1, d.rows), 38) // up
+            , keyCodeHandler(d => moveVertical(1, d.rows), 40)  // down
+            , keyCodeHandler(() => moveHorizontal(-1), 37)      // left
+            , keyCodeHandler(() => moveHorizontal(1), 39)       // right
+            , keyCodeHandler(onTab, 9)
+            , activateFromInput
+            )
+          )
     }
 
-    function onClick(d, i) {
+    function setupPasteEvents() {
+      select(document)
+          .on(clipboardKeydown, trackPaste ? onClipMaybe : null)
+          .on(clipboardKeyup, trackPaste ? onClipAfter : null)
+    }
+
+    function setupDragEvents() {
+      target.call(
+        cellDragBehaviour
+            .on('dragstart.select', d => mouseSelection(d))
+            .on('dragstart.active', setActive)
+            .on('dragstart.redraw', () => target.dispatch('redraw', { bubbles: true }))
+
+            .on('dragend.set-active', activateLastCell)
+            .on('dragend.redraw', () => target.dispatch('redraw', { bubbles: true }))
+
+            .on('dragover.select', d => mouseSelection(d, true))
+            .on('dragover.cache', d => lastOverCell = d)
+            .on('dragover.redraw', () => target.dispatch('redraw', { bubbles: true }))
+      )
+    }
+
+    function activateLastCell() {
+      if (!lastOverCell) return
+      setActive(lastOverCell)
+      lastOverCell = null
+    }
+
+    function mouseBlockSelect(cell) {
+      setSelectionToRange(active, cell)
+      target.dispatch('redraw', { bubbles: true })
+    }
+
+    function onClipMaybe() {
+      const targetNode = target.node()
+          , allAcceptedNodes = (acceptPasteFrom || []).concat(targetNode)
+          , { ctrlKey } = event
+
+      if (!allAcceptedNodes.some(n => n.contains(document.activeElement))) return
+      if (!ctrlKey) return
+
+      clip = select(document.body)
+            .select(clipboardProxy)
+              .on('paste.cell-selection', onPaste)
+
+      clip.node().focus()
+      clip.node().select()
+
+      function onPaste() {
+        const clipboardData = event.clipboardData
+
+        if (!clipboardData) { 
+          isIEPasting = true
+          return
+        }
+
+        const text = clipboardData.getData('Text') 
+        dispatch.call('cell-active-paste', targetNode, active, text)
+      }
+    }
+
+    function onClipAfter() {
+      const targetNode = target.node()
+          , { key } = event
+
+      if (!key == 'Control') return
+
+      if (isIEPasting) {
+        dispatch.call('cell-active-paste', targetNode, active, clip.property('value'))
+        isIEPasting = false
+      }
+
+      if (clip) {
+        clip.remove()
+        clip = null
+        targetNode.focus()
+      }
+    }
+
+    function activateFromInput(d) {
+      const { key, ctrlKey, altKey, metaKey } = event
+
+      if (!typeToActivate) return
+      if (ctrlKey || altKey || metaKey) return
+      if (!active) return
+      if (isASpecialKey(key)) return
+
+      dispatch.call('cell-active-action', target.node(), active, key)
+    }
+
+    function onTab(d) {
+      moveHorizontal(event.shiftKey ? -1 : 1)
+      event.preventDefault()
+    }
+
+    function mouseSelection(d, forceAppend) {
       const column = d.column
           , columnId = column.id
           , set = selectedRowsByColumnId[columnId]
           , row = unwrap(d.row)
-          , { shiftKey, ctrlKey } = event
-          , target = { row, column }
+          , { shiftKey, ctrlKey } = event.sourceEvent ? event.sourceEvent : event
+          , cell = { row, column }
           , isAlreadySelected = set && set.has(row)
           , hasActive = !!active
 
-      switch(true) {
+      if (selectable) {
+        switch(true) {
+          case ctrlKey && shiftKey && hasActive:
+            addRangeToSelection(active, cell)
+            break
 
-        case ctrlKey && shiftKey && hasActive:
-          addRangeToSelection(active, target)
-          break
+          case forceAppend || shiftKey && hasActive:
+            setSelectionToRange(active, cell)
+            break
 
-        case shiftKey && hasActive:
-          setSelectionToRange(active, target)
-          break
+          case ctrlKey && isAlreadySelected:
+            removeFromSelected(cell)
+            break
 
-        case ctrlKey && isAlreadySelected:
-          removeFromSelected(target)
-          break
+          case ctrlKey:
+            addToSelected(cell)
+            break
 
-        case ctrlKey:
-          addToSelected(target)
-          break
+          default:
+            selectOnly(cell)
+        }
 
-        default:
-          selectOnly(target)
+        selected = compileSelected()
+        dispatch.call('cell-selected-change', this, selected, active)
+      }
+    }
+
+    function setActive(cell) {
+
+      if (!cell) {
+        active = null
+        return
       }
 
-      active = target
-      selected = compileSelected()
-
-      dispatch.call('cell-selected-change', this, selected, active)
-      select(this).dispatch('redraw', { bubbles: true })
+      const { row, column } = cell
+      active = { row: unwrap(row), column }
+      dispatch.call('cell-active-change', this, active)
     }
 
     function setSelectionToRange(a, b) {
@@ -125,17 +375,15 @@ export function createCellSelection() {
     }
 
     function rangeFrom(a, b) {
-      const columns = bundle.columns
-          , columnRange = rangeFromUnorderedIndices(
+      const columnRange = rangeFromUnorderedIndices(
               columns
             , columns.indexOf(a.column)
             , columns.indexOf(b.column)
             )
-          , rows = bundle.rows
           , rowRange = rangeFromUnorderedIndices(
-              rows
-            , findIndex(rows, r => unwrap(r) == a.row)
-            , findIndex(rows, r => unwrap(r) == b.row)
+              bundle.rows
+            , findIndex(bundle.rows, r => unwrap(r) == a.row)
+            , findIndex(bundle.rows, r => unwrap(r) == b.row)
             ).map(unwrap)
 
       return rowRange.reduce(allCellsInColumns, [])
@@ -193,6 +441,10 @@ export function createCellSelection() {
     if (!active) return false
     return areSameCell(d, active)
   }
+}
+
+function isASpecialKey(key) {
+  return key.length > 1
 }
 
 function areSameCell(a, b) {
