@@ -18,6 +18,7 @@ export function createGatherRows() {
     , defaultExpanded = true
     , defaultPredicate = () => true
     , renderLabel = true
+    , titleLabelComponent = setTitleText
 
   function gatherRows(s) {
     s.each(gatherRowsEach)
@@ -27,6 +28,12 @@ export function createGatherRows() {
   gatherRows.defaultExpanded = function(value) {
     if (!arguments.length) return defaultExpanded
     defaultExpanded = value
+    return gatherRows
+  }
+
+  gatherRows.titleLabelComponent = function(value) {
+    if (!arguments.length) return titleLabelComponent
+    titleLabelComponent = value
     return gatherRows
   }
 
@@ -86,7 +93,7 @@ export function createGatherRows() {
     } else { 
       labelTarget = target.select(rowLabel)
       iconTarget = labelTarget.select(rowIcon)
-      titleTarget = labelTarget.select(rowTitle).text(label)
+      titleTarget = labelTarget.select(rowTitle).each(titleLabelComponent)
     }
 
     target.on('click.gather-rows', isGroupRow ? onRowClick : null)
@@ -100,5 +107,9 @@ export function createGatherRows() {
         .dispatch('data-dirty', { bubbles: true })
         .dispatch('redraw', { bubbles: true })
     }
+  }
+
+  function setTitleText(d) {
+    select(this).text(d => isUndefined(d.row.label) ? '' : d.row.label)
   }
 }

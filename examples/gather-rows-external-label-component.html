@@ -1,0 +1,60 @@
+<!doctype html>
+<head><meta charset="utf-8" /></head>
+<body>
+
+<div class="grid-target"></div>
+
+<link rel="stylesheet" type="text/css" href="../node_modules/normalize.css/normalize.css">
+<script src="../node_modules/underscore/underscore.js"></script>
+<script src="../node_modules/d3/build/d3.js"></script>
+<script src="../node_modules/@zambezi/d3-utils/dist/d3-utils.js"></script>
+<script src="../node_modules/@zambezi/fun/dist/fun.js"></script>
+<script src="../node_modules/faker/faker.js"></script>
+<script src="../node_modules/@zambezi/grid/dist/grid.js"></script>
+<script src="../dist/grid-components.js"></script>
+<script>
+
+  const rows = _.range(1, 50).map(faker.Helpers.createCard)
+      , gatherRows = gridComponents.createGatherRows()
+            .groups(
+              [
+                {
+                  label: 'Usernames with dots'
+                , predicate:  row => row.username.indexOf('.') >= 0
+                },
+                {
+                  label: 'Usernames with underscores'
+                , predicate:  row => row.username.indexOf('_') >= 0
+                },
+                {
+                  label: 'Something that does not match on this dataset'
+                , predicate: () => false
+                },
+                {
+                  label: 'Other usernames'
+                }
+              ]
+            )
+            .titleLabelComponent(simpleLabel)
+
+      , table = grid.createGrid()
+            .columns(
+              [
+                { key: 'name', width: 200 }
+              , { key: 'username' }
+              , { key: 'email' }
+              , { key: 'phone' }
+              ]
+            )
+            .usePre(gatherRows)
+
+      , target = d3.select('.grid-target')
+            .style('height', '800px')
+            .datum(rows)
+            .call(table)
+
+  function simpleLabel(d) {
+    d3.select(this).text(d.row.label.split('').reverse().join(''))
+  }
+</script>
+</body>
