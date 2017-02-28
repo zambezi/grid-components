@@ -16,3 +16,5 @@
   - [Edit cell value](man/edit-cell-value.md)
   - [Bespoke cell editors](man/bespoke-cell-editors.md)
   - [Custom Popovers](man/custom-popovers.md)
+  - [Formatting nested rows](man/nested-rows-format.md)
+

@@ -14,27 +14,27 @@
 <script src="../dist/grid-components.js"></script>
 <script>
 
-  const rows = _.range(1, 50).map(faker.Helpers.createCard)
+  const price = d3.randomNormal(1000, 100)
+      , rows = _.range(1, 50).map(faker.Helpers.createCard).map(addPrice)
       , gatherRows = gridComponents.createGatherRows()
             .groups(
               [
                 {
                   label: 'Usernames with dots'
                 , predicate:  row => row.username.indexOf('.') >= 0
-                },
-                {
+                }
+              , {
                   label: 'Usernames with underscores'
                 , predicate:  row => row.username.indexOf('_') >= 0
-                },
-                {
+                }
+              , {
                   label: 'Something that does not match on this dataset'
                 , predicate: () => false
-                },
-                {
-                  label: 'Other usernames'
                 }
+              , { label: 'Other usernames' }
               ]
             )
+
       , table = grid.createGrid()
             .columns(
               [
@@ -42,6 +42,14 @@
               , { key: 'username' }
               , { key: 'email' }
               , { key: 'phone' }
+              , {
+                  label: 'Price'
+                , format: gridComponents.nestedRowFormat(
+                    priceSummary
+                  , r => r.price
+                  )
+                , sort: (a, b) => a.price - b.price 
+                }
               ]
             )
             .usePre(gatherRows)
@@ -50,5 +58,15 @@
             .style('height', '800px')
             .datum(rows)
             .call(table)
+
+  function priceSummary(r) {
+    return `Total: ${ r.children.reduce((acc, r) => acc + r.price, 0)}`
+  }
+
+  function addPrice(r) {
+    r.price = Math.round(price() / 10) * 10
+    return r
+  }
+
 </script>
 </body>
