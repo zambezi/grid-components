@@ -14,9 +14,9 @@ export function createRowSelection() {
     s.each(rowSelectionEach)
   }
 
-  rowSelection.selected = function(value) {
-    if (!arguments.length) return selected
-    selected = value
+  rowSelection.active = function(value) {
+    if (!arguments.length) return active
+    active = value
     return rowSelection
   }
 
