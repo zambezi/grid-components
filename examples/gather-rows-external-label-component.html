@@ -1,5 +1,24 @@
 <!doctype html>
-<head><meta charset="utf-8" /></head>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    .counter {
+      padding-left: 4px;
+      padding-right: 4px;
+      background-color: green;
+      color: white;
+      margin-right: 4px;
+    }
+
+    .counter-children {
+      padding-left: 4px;
+      padding-right: 4px;
+      background-color: blue;
+      color: white;
+      margin-right: 4px;
+    }
+  </style>
+</head>
 <body>
 
 <div class="grid-target"></div>
@@ -15,6 +34,9 @@
 <script>
 
   const rows = _.range(1, 50).map(faker.Helpers.createCard)
+      , counter = d3Utils.appendIfMissing('span.counter')
+      , counterChildren = d3Utils.appendIfMissing('span.counter-children')
+      , innerLabel = d3Utils.appendIfMissing('span.inner-label')
       , gatherRows = gridComponents.createGatherRows()
             .groups(
               [
@@ -54,7 +76,10 @@
             .call(table)
 
   function simpleLabel(d) {
-    d3.select(this).text(d.row.label.split('').reverse().join(''))
+    const target = d3.select(this)
+    target.select(counter).text(new Date().toUTCString())
+    target.select(counterChildren).text(`${d.row.children.length} children`)
+    target.select(innerLabel).text(d.row.label.split('').reverse().join(''))
   }
 </script>
 </body>
