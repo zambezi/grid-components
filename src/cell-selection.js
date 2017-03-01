@@ -444,7 +444,7 @@ export function createCellSelection() {
 }
 
 function isASpecialKey(key) {
-  return key.length > 1
+  return key && key.length > 1
 }
 
 function areSameCell(a, b) {
