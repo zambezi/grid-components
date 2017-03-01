@@ -16,7 +16,7 @@ export function createRunHeaderComponents() {
 
   function runComponents(d, i) {
     const components = d.headerComponents
-        , target = d3.select(this)
+        , target = select(this)
 
     if (!components) return
     components.forEach(component => target.each(component))
