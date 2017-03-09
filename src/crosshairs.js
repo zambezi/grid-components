@@ -2,9 +2,11 @@ import { select } from 'd3-selection'
 import './crosshairs.css'
 
 export function createCrosshairs() {
-  
-  let vertical = false
+
+  let vertical = true
     , horizontal = true
+    , highlightedRow
+    , highlightedColum
 
   function crosshairs(s) {
     s.each(crosshairsEach)
@@ -17,23 +19,39 @@ export function createCrosshairs() {
 
     dispatcher
           .on('cell-enter.crosshairs-column', vertical ? setColumnListeners : null)
+          .on('cell-update.crosshairs-column', vertical ? updateColumnHighlight : null)
           .on('cell-exit.crosshairs-column', vertical ? clearColumnListeners : null)
           .on('row-enter.crosshairs-row', horizontal ? setRowListeners : null)
+          .on('row-update.crosshairs-row', horizontal ? updateRowHighlight : null)
           .on('row-exit.crosshairs-row', horizontal ? clearRowListeners : null)
   }
 
-  function onRowHover(d) {
+  function onRowHover({ row }) {
+    highlightedRow = row
     target.selectAll('.zambezi-grid-row')
-        .classed('is-crosshairs-over', r => d.index === r.index)
-        .each(r => console.log(r.index === d.index))
+        .each(updateRowHighlight)
+  }
+
+  function onColumnHover({ column }) {
+    highlightedColum = column
+    target.selectAll('.zambezi-grid-cell')
+        .each(updateColumnHighlight)
   }
 
   function setRowListeners(d) {
     select(this).on('mouseover.crosshairs-row', onRowHover)
   }
 
+  function updateRowHighlight({ row }) {
+    select(this).classed('is-crosshairs-over', row === highlightedRow)
+  }
+
+  function updateColumnHighlight({ column }) {
+    select(this).classed('is-crosshairs-over', column === highlightedColum)
+  }
+
   function setColumnListeners(d) {
-    select(this).on('mouseover.crosshairs-row', d => console.log('column hover', d, this))
+    select(this).on('mouseover.crosshairs-row', onColumnHover)
 
   }
 
