@@ -1,6 +1,6 @@
 {
   "name": "@zambezi/grid-components",
-  "version": "0.8.0-crosshairs-component-work.1",
+  "version": "0.9.0-crosshairs-component-work.1",
   "description": "Components for the Zambezi Grids",
   "keywords": [
     "d3",
