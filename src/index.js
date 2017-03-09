@@ -1,5 +1,6 @@
 export { createCellDragBehaviour } from './cell-drag-behaviour'
 export { createCellSelection } from './cell-selection'
+export { createCrosshairs } from './crosshairs'
 export { createEditCell } from './edit-cell'
 export { createEditCellValue } from './edit-cell-value'
 export { createGatherRows } from './gather-rows'
