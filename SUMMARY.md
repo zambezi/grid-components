@@ -11,7 +11,7 @@
   - [Row selection](man/row-selection.md)
   - [Run header components](man/run-header-components.md)
   - [Gather rows](man/gather-rows.md)
-  - [Grid crossharis](man/crossharis.md)
+  - [Grid crosshairs](man/crosshairs.md)
 
 - Column specific components
   - [Edit cell value](man/edit-cell-value.md)
