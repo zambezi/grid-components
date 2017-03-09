@@ -20,7 +20,7 @@ const rows = _.range(1, 500).map(faker.Helpers.createCard)
           .columns(
             [
               { key: 'name', width: 200 }
-            , { key: 'username' }
+            , { key: 'username', locked: 'left' }
             , { key: 'email' }
             , {
                 label: 'some synthetic column'
@@ -28,7 +28,7 @@ const rows = _.range(1, 500).map(faker.Helpers.createCard)
               , sort: (a, b) => d3.ascending(a.name, b.name)
               }
             , { key: 'phone' }
-            , { label: 'changed', format: () => _.uniqueId('ch:') }
+            , { label: 'changed', format: () => _.uniqueId('ch:'), locked: 'right' }
             ]
           )
           .usePre(crosshairs)

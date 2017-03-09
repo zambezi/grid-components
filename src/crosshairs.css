@@ -1,3 +1,4 @@
-body {
-  background-color: red;
+.zambezi-grid-row.is-crosshairs-over {
+  background-color: orange;
+  border: 3px dotted green;
 }
