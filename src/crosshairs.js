@@ -12,6 +12,18 @@ export function createCrosshairs() {
     s.each(crosshairsEach)
   }
 
+  crosshairs.vertical = function(value) {
+    if (!arguments.length) return vertical
+    vertical = value
+    return crosshairs
+  }
+
+  crosshairs.horizontal = function(value) {
+    if (!arguments.length) return horizontal
+    horizontal = value
+    return crosshairs
+  }
+
   return crosshairs
 
   function crosshairsEach({ rows, dispatcher }, i) {
@@ -76,5 +88,4 @@ export function createCrosshairs() {
       select(this).classed('is-crosshairs-over', column === highlightedColum)
     }
   }
-
 }
