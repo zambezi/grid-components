@@ -17,6 +17,8 @@ export function createCrosshairs() {
   function crosshairsEach({ rows, dispatcher }, i) {
     const target = select(this)
 
+    updateHeaders()
+
     dispatcher
           .on('cell-enter.crosshairs-column', vertical ? setColumnListeners : null)
           .on('cell-update.crosshairs-column', vertical ? updateColumnHighlight : null)
@@ -24,6 +26,11 @@ export function createCrosshairs() {
           .on('row-enter.crosshairs-row', horizontal ? setRowListeners : null)
           .on('row-update.crosshairs-row', horizontal ? updateRowHighlight : null)
           .on('row-exit.crosshairs-row', horizontal ? clearRowListeners : null)
+  }
+
+  function updateHeaders() {
+    target.selectAll('.zambezi-grid-headers .zambezi-grid-header')
+          .each(updateHeaderHighlight)
   }
 
   function onRowHover({ row }) {
@@ -36,6 +43,8 @@ export function createCrosshairs() {
     highlightedColum = column
     target.selectAll('.zambezi-grid-cell')
         .each(updateColumnHighlight)
+
+    updateHeaders()
   }
 
   function setRowListeners(d) {
@@ -61,6 +70,10 @@ export function createCrosshairs() {
 
   function clearColumnListeners(d) {
     select(this).on('mouseover.crosshairs-row', null)
+  }
+
+  function updateHeaderHighlight(column) {
+    select(this).classed('is-crosshairs-over', column === highlightedColum)
   }
 
 }

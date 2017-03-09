@@ -10,3 +10,7 @@
   background-color: fuchsia;
   color: white;
 }
+
+.zambezi-grid-header.is-crosshairs-over {
+  background-color: aqua;
+}
