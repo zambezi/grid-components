@@ -1,0 +1,16 @@
+.zambezi-grid-row.is-crosshairs-over {
+  background-color: #dff;
+}
+
+.zambezi-grid-cell.is-crosshairs-over {
+  background-color: #dff;
+}
+
+.zambezi-grid-row.is-crosshairs-over .zambezi-grid-cell.is-crosshairs-over {
+  background-color: fuchsia;
+  color: white;
+}
+
+.zambezi-grid-header.is-crosshairs-over {
+  background-color: aqua;
+}
