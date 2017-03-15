@@ -1,5 +1,6 @@
 {
-  "version": "0.10.1",
+  "name": "@zambezi/grid-components",
+  "version": "0.10.0",
   "description": "Components for the Zambezi Grids",
   "keywords": [
     "d3",
