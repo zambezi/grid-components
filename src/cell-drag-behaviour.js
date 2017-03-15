@@ -46,10 +46,10 @@ export function createCellDragBehaviour() {
   function configureDragBehaviour() {
     select(this)
         .call(drag)
-        .on('mouseenter.drag-to-select', onMouseEnter)
+        .on('mouseover.drag-to-select', onMouseOver)
   }
 
-  function onMouseEnter(d) {
+  function onMouseOver(d) {
     if (!isDragging) return
     dispatch.call('dragover', this, d)
   }

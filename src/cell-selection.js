@@ -13,6 +13,7 @@ export function createCellSelection() {
 
   const dispatch = createDispatch(
           'cell-selected-change'
+        , 'cell-selected-update'
         , 'cell-active-action'
         , 'cell-active-change'
         , 'cell-active-paste'
@@ -181,6 +182,7 @@ export function createCellSelection() {
       selectedRowsByColumnId = selectedCandidates.reduce(toRealSelection, {})
       selected = compileSelected()
       selectedCandidates = null
+      dispatch.call('cell-selected-update', this, selected, active)
     }
 
     function toRealSelection(acc, { row, column }) {
@@ -444,7 +446,7 @@ export function createCellSelection() {
 }
 
 function isASpecialKey(key) {
-  return key.length > 1
+  return key && key.length > 1
 }
 
 function areSameCell(a, b) {
