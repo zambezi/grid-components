@@ -154,7 +154,10 @@ export function createCellSelection() {
       rowUpdateNeeded = false
       if (rowSelectionKey === defaultSelectionKey) return
       const newRowByOldRow = new Map()
-      selectedCandidates = (selected || []).reduce(updateRowFromSelectionKey, [])
+      selectedCandidates = (selected || [])
+          .reduce(updateRowFromSelectionKey, [])
+          .concat(selectedCandidates || [])
+
       function updateRowFromSelectionKey(acc, {column, row}) {
         const rowSeen = newRowByOldRow.has(row)
         let newRow = newRowByOldRow.get(row)
