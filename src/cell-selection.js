@@ -28,8 +28,7 @@ export function createCellSelection() {
       , defaultSelectionKey = d => d
       , clipboardProxy = appendIfMissing('textarea.zambezi-grid-clipboard-proxy')
 
-  let gesture = 'click'
-    , selected = []
+  let selected = []
     , selectedCandidates
     , selectedRowsByColumnId = {}
     , acceptPasteFrom = []
