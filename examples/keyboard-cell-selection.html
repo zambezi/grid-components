@@ -37,6 +37,7 @@
   <button id="clear-selection">clear selection</button>
   <button id="programmatic-select">programmatically select some cells</button>
   <button id="programmatic-select-by-indices">programmtically select some cells (using row index and column id)</button>
+  <button id="programmatic-select-active">set active to random</button>
 </p>
 
 <pre id="output"></pre>
@@ -67,7 +68,7 @@
 <script src="../dist/grid-components.js"></script>
 <script>
 
-  const rows = _.range(1, 500).map(faker.Helpers.createCard)
+  const rows = _.range(1, 30).map(faker.Helpers.createCard)
         highlightActiveCell = gridComponents.createHighlightActiveCell()
       , highlightSelectedCells = gridComponents.createHighlightSelectedCells()
       , cellSelection = gridComponents.createCellSelection()
@@ -75,6 +76,7 @@
             .on('cell-active-paste.log', (active, data) => console.log('PASTE on grid', active, data))
             .on('cell-active-paste.render', onPaste)
             .on('cell-active-change.highlight', highlightActiveCell.activeCell)
+            .on('cell-active-update.highlight', highlightActiveCell.activeCell)
             .on('cell-selected-change.highlight', highlightSelectedCells.selectedCells)
             .on('cell-selected-update.highlight', highlightSelectedCells.selectedCells)
             .acceptPasteFrom(d3.selectAll('.external-paste-target').nodes())
@@ -147,6 +149,11 @@
         'click.reset'
       , () => cellSelection.selected([ { row: 1, column: 'username' }, { row: 2, column: 'email'} ])
       )
+      .on('click.redraw', () => target.call(table))
+
+  d3.select('#programmatic-select-active')
+      .on('click.clear', () => console.clear())
+      .on('click.reset', () => cellSelection.active(bunchOfCells()[0]))
       .on('click.redraw', () => target.call(table))
 
   function setupGridClick(d) {

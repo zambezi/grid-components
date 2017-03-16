@@ -16,6 +16,7 @@ export function createCellSelection() {
         , 'cell-selected-update'
         , 'cell-active-action'
         , 'cell-active-change'
+        , 'cell-active-update'
         , 'cell-active-paste'
         )
       , clipboardKeydown = uniqueId('keydown.clipboard.')
@@ -30,6 +31,7 @@ export function createCellSelection() {
 
   let selected = []
     , selectedCandidates
+    , activeCandidate
     , selectedRowsByColumnId = {}
     , acceptPasteFrom = []
     , active
@@ -80,6 +82,7 @@ export function createCellSelection() {
   cellSelection.active = function(value) {
     if (!arguments.length) return active
     active = value
+    activeCandidate = value
     return cellSelection
   }
 
@@ -123,7 +126,8 @@ export function createCellSelection() {
     setupKeyboardNavEvents()
 
     if (rowUpdateNeeded) updateRowsFromKeys()
-    if (selectedCandidates) updateFromCandidates()
+    if (selectedCandidates) updateSelectedFromCandidates()
+    if (activeCandidate) updateAcitveFromCandidate()
 
     bundle.dispatcher
         .on('cell-update.cell-selection', onCellUpdate)
@@ -180,28 +184,43 @@ export function createCellSelection() {
       select(this).dispatch('redraw', { bubbles: true })
     }
 
-    function updateFromCandidates() {
+    function updateAcitveFromCandidate() {
+      active = candidateToSelection(activeCandidate)
+      activeCandidate = null
+      dispatch.call('cell-active-update', this, active)
+    }
+
+    function updateSelectedFromCandidates() {
       selectedRowsByColumnId = selectedCandidates.reduce(toRealSelection, {})
       selected = compileSelected()
       selectedCandidates = null
       dispatch.call('cell-selected-update', this, selected, active)
     }
 
-    function toRealSelection(acc, { row, column }) {
-      const columnFound = typeof column == 'string' ? columnById[column] : column
-          , rowFound = typeof row == 'number' ? bundle[row] : row
+    function toRealSelection(acc, candidate) {
 
-      if (!columnFound || !rowFound) {
-        console.warn("Couldn't find cell for", { row, column })
+      const selection = candidateToSelection(candidate)
+
+      if (!selection) {
+        console.warn("Couldn't find cell for", candidate)
         return acc
       }
 
-      const columnId = columnFound.id
+      const columnId = selection.column.id
           , set = acc[columnId] || new Set()
 
-      set.add(rowFound)
+      set.add(selection.row)
       acc[columnId] = set
       return acc
+
+    }
+
+    function candidateToSelection({ row, column }) {
+      const columnFound = typeof column == 'string' ? columnById[column] : column
+          , rowFound = typeof row == 'number' ? bundle[row] : row
+
+      if (!columnFound || !rowFound) return undefined
+      return { row: rowFound, column: columnFound }
     }
 
     function compileSelected() {
