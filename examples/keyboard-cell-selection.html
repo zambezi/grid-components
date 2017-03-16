@@ -38,6 +38,7 @@
   <button id="programmatic-select">programmatically select some cells</button>
   <button id="programmatic-select-by-indices">programmtically select some cells (using row index and column id)</button>
   <button id="programmatic-select-active">set active to random</button>
+  <button id="programmatic-select-active-by-indices">set active to row index and column id</button>
 </p>
 
 <pre id="output"></pre>
@@ -149,6 +150,11 @@
         'click.reset'
       , () => cellSelection.selected([ { row: 1, column: 'username' }, { row: 2, column: 'email'} ])
       )
+      .on('click.redraw', () => target.call(table))
+
+  d3.select('#programmatic-select-active-by-indices')
+      .on('click.clear', () => console.clear())
+      .on('click.reset', () => cellSelection.active({ row: 1, column: 'username' }))
       .on('click.redraw', () => target.call(table))
 
   d3.select('#programmatic-select-active')
