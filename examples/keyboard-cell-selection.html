@@ -76,6 +76,7 @@
             .on('cell-active-paste.render', onPaste)
             .on('cell-active-change.highlight', highlightActiveCell.activeCell)
             .on('cell-selected-change.highlight', highlightSelectedCells.selectedCells)
+            .on('cell-selected-update.highlight', highlightSelectedCells.selectedCells)
             .acceptPasteFrom(d3.selectAll('.external-paste-target').nodes())
             .rowSelectionKey(r => r.phone)
 
