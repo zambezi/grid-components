@@ -1,6 +1,6 @@
 {
   "name": "@zambezi/grid-components",
-  "version": "0.10.0",
+  "version": "0.11.0-active-selection.1",
   "description": "Components for the Zambezi Grids",
   "keywords": [
     "d3",

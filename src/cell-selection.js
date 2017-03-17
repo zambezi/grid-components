@@ -2,7 +2,7 @@ import { createCellDragBehaviour } from './cell-drag-behaviour'
 import { dispatch  as createDispatch }  from 'd3-dispatch'
 import { modulo } from '@zambezi/fun'
 import { rebind, keyCodeHandler, appendIfMissing } from '@zambezi/d3-utils'
-import { reduce, indexBy, find, findIndex, range, debounce, map, uniqueId } from 'underscore'
+import { reduce, indexBy, find, findIndex, debounce, uniqueId } from 'underscore'
 import { select, event } from 'd3-selection'
 import { someResult as some } from '@zambezi/fun'
 import { unwrap } from '@zambezi/grid'
@@ -16,6 +16,7 @@ export function createCellSelection() {
         , 'cell-selected-update'
         , 'cell-active-action'
         , 'cell-active-change'
+        , 'cell-active-update'
         , 'cell-active-paste'
         )
       , clipboardKeydown = uniqueId('keydown.clipboard.')
@@ -28,9 +29,9 @@ export function createCellSelection() {
       , defaultSelectionKey = d => d
       , clipboardProxy = appendIfMissing('textarea.zambezi-grid-clipboard-proxy')
 
-  let gesture = 'click'
-    , selected = []
+  let selected = []
     , selectedCandidates
+    , activeCandidate
     , selectedRowsByColumnId = {}
     , acceptPasteFrom = []
     , active
@@ -81,6 +82,7 @@ export function createCellSelection() {
   cellSelection.active = function(value) {
     if (!arguments.length) return active
     active = value
+    activeCandidate = value
     return cellSelection
   }
 
@@ -113,7 +115,7 @@ export function createCellSelection() {
 
   return api(cellSelection)
 
-  function cellSelectionEach(bundle, i) {
+  function cellSelectionEach(bundle) {
     const target = select(this)
             .on('data-dirty.cell-selection', () => rowUpdateNeeded = true)
         , { columns, rows } = bundle
@@ -124,7 +126,8 @@ export function createCellSelection() {
     setupKeyboardNavEvents()
 
     if (rowUpdateNeeded) updateRowsFromKeys()
-    if (selectedCandidates) updateFromCandidates()
+    if (selectedCandidates) updateSelectedFromCandidates()
+    if (activeCandidate) updateAcitveFromCandidate()
 
     bundle.dispatcher
         .on('cell-update.cell-selection', onCellUpdate)
@@ -155,7 +158,10 @@ export function createCellSelection() {
       rowUpdateNeeded = false
       if (rowSelectionKey === defaultSelectionKey) return
       const newRowByOldRow = new Map()
-      selectedCandidates = (selected || []).reduce(updateRowFromSelectionKey, [])
+      selectedCandidates = (selected || [])
+          .reduce(updateRowFromSelectionKey, [])
+          .concat(selectedCandidates || [])
+
       function updateRowFromSelectionKey(acc, {column, row}) {
         const rowSeen = newRowByOldRow.has(row)
         let newRow = newRowByOldRow.get(row)
@@ -170,7 +176,7 @@ export function createCellSelection() {
       }
     }
 
-    function setActiveIfNone(d) {
+    function setActiveIfNone() {
       if (active) return
       if (!bundle.length) return
       if (!columns.length) return
@@ -178,28 +184,43 @@ export function createCellSelection() {
       select(this).dispatch('redraw', { bubbles: true })
     }
 
-    function updateFromCandidates() {
+    function updateAcitveFromCandidate() {
+      active = candidateToSelection(activeCandidate)
+      activeCandidate = null
+      dispatch.call('cell-active-update', this, active)
+    }
+
+    function updateSelectedFromCandidates() {
       selectedRowsByColumnId = selectedCandidates.reduce(toRealSelection, {})
       selected = compileSelected()
       selectedCandidates = null
       dispatch.call('cell-selected-update', this, selected, active)
     }
 
-    function toRealSelection(acc, { row, column }) {
-      const columnFound = typeof column == 'string' ? columnById[column] : column
-          , rowFound = typeof row == 'number' ? bundle[row] : row
+    function toRealSelection(acc, candidate) {
 
-      if (!columnFound || !rowFound) {
-        console.warn("Couldn't find cell for", { row, column })
+      const selection = candidateToSelection(candidate)
+
+      if (!selection) {
+        console.warn("Couldn't find cell for", candidate)
         return acc
       }
 
-      const columnId = columnFound.id
+      const columnId = selection.column.id
           , set = acc[columnId] || new Set()
 
-      set.add(rowFound)
+      set.add(selection.row)
       acc[columnId] = set
       return acc
+
+    }
+
+    function candidateToSelection({ row, column }) {
+      const columnFound = typeof column == 'string' ? columnById[column] : column
+          , rowFound = typeof row == 'number' ? bundle[row] : row
+
+      if (!columnFound || !rowFound) return undefined
+      return { row: rowFound, column: columnFound }
     }
 
     function compileSelected() {
@@ -251,11 +272,6 @@ export function createCellSelection() {
       lastOverCell = null
     }
 
-    function mouseBlockSelect(cell) {
-      setSelectionToRange(active, cell)
-      target.dispatch('redraw', { bubbles: true })
-    }
-
     function onClipMaybe() {
       const targetNode = target.node()
           , allAcceptedNodes = (acceptPasteFrom || []).concat(targetNode)
@@ -302,7 +318,7 @@ export function createCellSelection() {
       }
     }
 
-    function activateFromInput(d) {
+    function activateFromInput() {
       const { key, ctrlKey, altKey, metaKey } = event
 
       if (!typeToActivate) return
@@ -313,7 +329,7 @@ export function createCellSelection() {
       dispatch.call('cell-active-action', target.node(), active, key)
     }
 
-    function onTab(d) {
+    function onTab() {
       moveHorizontal(event.shiftKey ? -1 : 1)
       event.preventDefault()
     }
@@ -428,13 +444,13 @@ export function createCellSelection() {
     }
   }
 
-  function onCellUpdate(d, i){
+  function onCellUpdate(){
     select(this)
         .classed('is-selected', isCellSelected)
         .classed('is-active', isCellActive)
   }
 
-  function isCellSelected(d, i) {
+  function isCellSelected(d) {
     const rowSetForColumn = selectedRowsByColumnId[d.column.id]
     return rowSetForColumn && rowSetForColumn.has(unwrap(d.row))
   }

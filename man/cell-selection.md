@@ -47,8 +47,10 @@ The cell selection component supports
 
 ### cell selection events 
 
-* `cell-selected-change`: the selected cells have changed -- the handler will receive the  new list of selected cells (`{column, rows}` pairs). 
-* `cell-active-change`: the active cell has changed -- the handler will receive the new selected cell.
+* `cell-selected-change`: the selected cells have changed by user interaction-- the handler will receive the  new list of selected cells (`{column, rows}` pairs). 
+* `cell-active-change`: the active cell has changed by user interaction -- the handler will receive the new selected cell.
+* `cell-selected-update`: the selected cells have been programmatically changed -- the handler will receive the  new list of selected cells (`{column, rows}` pairs). 
+* `cell-active-update`: the active cell has been programmatically changed -- the handler will receive the new selected cell.
 
 ### additional cell related events
 
