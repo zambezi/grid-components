@@ -17,6 +17,7 @@
 
   const rows = _.range(1, 200).map(faker.Helpers.createCard)
       , rowSelection = gridComponents.createRowSelection()
+            .on('row-active-change', r => console.log('row active change', r))
       , table = grid.createGrid()
             .columns(
               [
