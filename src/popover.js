@@ -4,25 +4,23 @@ import { select, selectAll, event } from 'd3-selection'
 import { uniqueId } from 'underscore'
 
 import './popover.css'
-export function createPopover() {
-
+export function createPopover () {
   const dispatch = createDispatch('open', 'close')
   let lastCreated
 
-  function popover(d, i) {
+  function popover (d, i) {
+    const clickCloseEventName = uniqueId('click.cell-popover-close-'),
+      body = select(document.body),
+      anchor = this,
 
-    const clickCloseEventName = uniqueId('click.cell-popover-close-')
-        , body = select(document.body)
-        , anchor = this
+      popover = body.select(appendIfMissing('div.zambezi-grid-popover'))
+              .html(''),
 
-        , popover = body.select(appendIfMissing('div.zambezi-grid-popover'))
-              .html('')
-
-        , popoverContent = popover.append('div')
+      popoverContent = popover.append('div')
               .on('popover-close.cleanup', removeClickOutsideHandler)
-              .on('popover-close.close', close)
+              .on('popover-close.close', close),
 
-        , gridRoot = select(this)
+      gridRoot = select(this)
             .selectAll(upwards('.zambezi-grid'))
               .on('grid-scroll.cell-popover', close)
 
@@ -32,32 +30,31 @@ export function createPopover() {
 
     popover.each(smartPosition)
 
-    function removeClickOutsideHandler() {
+    function removeClickOutsideHandler () {
       body.on(clickCloseEventName, null)
     }
 
-    function smartPosition(d) {
+    function smartPosition (d) {
+      const target = select(this),
+        anchorRect = anchor.getBoundingClientRect(),
+        popupRect = this.getBoundingClientRect(),
+        bodyRect = document.body.getBoundingClientRect(),
 
-      const target = select(this)
-          , anchorRect = anchor.getBoundingClientRect()
-          , popupRect = this.getBoundingClientRect()
-          , bodyRect = document.body.getBoundingClientRect()
-
-          , fitsRight = (anchorRect.left + anchorRect.width + popupRect.width) <= bodyRect.width
-          , fitsBottom = (anchorRect.top + popupRect.height) <= bodyRect.height
-          , left = fitsRight ? anchorRect.left + anchorRect.width : anchorRect.left - popupRect.width
-          , top = fitsBottom ? anchorRect.top : (anchorRect.top + anchorRect.height) - popupRect.height
+        fitsRight = (anchorRect.left + anchorRect.width + popupRect.width) <= bodyRect.width,
+        fitsBottom = (anchorRect.top + popupRect.height) <= bodyRect.height,
+        left = fitsRight ? anchorRect.left + anchorRect.width : anchorRect.left - popupRect.width,
+        top = fitsBottom ? anchorRect.top : (anchorRect.top + anchorRect.height) - popupRect.height
 
       target
-          .style('left', `${ Math.max(left, 0) }px`)
-          .style('top', `${ Math.max(top, 0) }px`)
+          .style('left', `${Math.max(left, 0)}px`)
+          .style('top', `${Math.max(top, 0)}px`)
           .classed('is-right', fitsRight)
           .classed('is-left', !fitsRight)
           .classed('is-below', fitsBottom)
           .classed('is-above', !fitsBottom)
     }
 
-    function onClickOutside() {
+    function onClickOutside () {
       const target = event.target
 
       if (popover.node().contains(target)) return
@@ -74,7 +71,7 @@ export function createPopover() {
       close()
     }
 
-    function close() {
+    function close () {
       gridRoot.on('grid-scroll.cell-popover', null)
       body.on(clickCloseEventName, null)
       popover.remove()
@@ -85,8 +82,8 @@ export function createPopover() {
   return rebind().from(dispatch, 'on')(popover)
 }
 
-function upwards(selector) {
-  function upwardsSelect(d, i) {
+function upwards (selector) {
+  function upwardsSelect (d, i) {
     if (!this.parentNode || this.parentNode === document.body) return null
     if (selectAll([this.parentNode]).filter(selector).empty()) {
       return upwardsSelect.apply(this.parentNode, [...arguments])
