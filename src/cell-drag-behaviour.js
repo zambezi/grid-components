@@ -1,18 +1,16 @@
 import { dispatch as createDispatch } from 'd3-dispatch'
 import { drag as createDrag } from 'd3-drag'
-import { redispatch, rebind } from '@zambezi/d3-utils'
+import { rebind } from '@zambezi/d3-utils'
 import { select, event } from 'd3-selection'
 
 export function createCellDragBehaviour () {
-  const cellSelector = '.zambezi-grid-cell',
-    maxParentCheckJumps = 3,
-    drag = createDrag().filter(ignoreDragSelector),
-    dispatch = createDispatch('dragover', 'dragstart', 'dragend'),
-    api = rebind().from(dispatch, 'on')
+  const drag = createDrag().filter(ignoreDragSelector)
+  const dispatch = createDispatch('dragover', 'dragstart', 'dragend')
+  const api = rebind().from(dispatch, 'on')
 
-  let isDragging = false,
-    ignoreSelector = 'input, button',
-    debugIgnoreSelector = false
+  let isDragging = false
+  let ignoreSelector = 'input, button'
+  let debugIgnoreSelector = false
 
   function cellDragBehaviour (s) {
     s.each(cellDragBehaviourEach)
@@ -34,9 +32,9 @@ export function createCellDragBehaviour () {
 
   function cellDragBehaviourEach ({ dispatcher, scroll, columns }) {
     drag
-        .on('start.activate', d => isDragging = true)
+        .on('start.activate', d => (isDragging = true))
         .on('start.redispatch', d => dispatch.call('dragstart', null, d))
-        .on('end.deactivate', () => isDragging = false)
+        .on('end.deactivate', () => (isDragging = false))
         .on('end.redispatch', d => dispatch.call('dragend', null, d))
 
     dispatcher.on('cell-enter.drag-to-select', configureDragBehaviour)
@@ -62,12 +60,5 @@ export function createCellDragBehaviour () {
       )
     }
     return !ignore
-  }
-
-  function findParentCell (dom, depth = 0) {
-    if (!dom) return null
-    if (depth > maxParentCheckJumps) return null
-    if (select(dom).filter(cellSelector).size()) return dom
-    return findParentCell(dom.parentElement, depth++)
   }
 }

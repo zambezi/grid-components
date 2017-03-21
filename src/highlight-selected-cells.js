@@ -4,13 +4,13 @@ import { select } from 'd3-selection'
 
 import './highlight-selected-cells.css'
 
-const highlightContainer = appendIfMissing('div.selected-cells-highlight.zambezi-grid-overlay'),
-  borderDirty = selectionChanged()
+const highlightContainer = appendIfMissing('div.selected-cells-highlight.zambezi-grid-overlay')
+const borderDirty = selectionChanged()
 
 export function createHighlightSelectedCells () {
-  let selectedCells = [],
-    borderCache,
-    borderRedrawGen = 0
+  let selectedCells = []
+  let borderCache
+  let borderRedrawGen = 0
 
   function highlightSelectedCells (s) {
     s.each(highlightSelectedCellsEach)
@@ -26,11 +26,11 @@ export function createHighlightSelectedCells () {
   return highlightSelectedCells
 
   function highlightSelectedCellsEach (bundle) {
-    const { columns, rows, scroll, rowHeight } = bundle,
-      container = select(this)
+    const { columns, rows, scroll, rowHeight } = bundle
+    const container = select(this)
               .on(
                 'data-dirty.highlight-selected-cells',
-                () => borderCache = null
+                () => (borderCache = null)
               )
             .select('.zambezi-grid-body')
             .select(highlightContainer)
@@ -46,38 +46,40 @@ export function createHighlightSelectedCells () {
 
     function renderCellHighlights (s) {
       const update = s.selectAll('.zambezi-grid-cell-highlight')
-                .data(borderCache),
-        enter = update.enter().append('span'),
-        exit = update.exit().remove(),
-        merged = update.merge(enter)
-                .attr('class', null)
-                .classed('zambezi-grid-cell-highlight', true)
-                .each(configureHighlightCell)
+                .data(borderCache)
+      const enter = update.enter().append('span')
+
+      update.exit().remove()
+      update.merge(enter)
+          .attr('class', null)
+          .classed('zambezi-grid-cell-highlight', true)
+          .each(configureHighlightCell)
     }
 
     function configureHighlightCell (d, i) {
-      const { column
-            , hasBottomBorder
-            , hasLeftBorder
-            , hasRightBorder
-            , hasTopBorder
-            , rowIndex
-            } = d
+      const {
+        column,
+        hasBottomBorder,
+        hasLeftBorder,
+        hasRightBorder,
+        hasTopBorder,
+        rowIndex
+      } = d
 
       select(this)
-              .style('top', `${rowIndex * rowHeight}px`)
-              .style('height', `${rowHeight}px`)
-              .classed(`c-${column.id}`, true)
-              .classed('has-bottom-border', hasBottomBorder)
-              .classed('has-left-border', hasLeftBorder)
-              .classed('has-top-border', hasTopBorder)
-              .classed('has-right-border', hasRightBorder)
+          .style('top', `${rowIndex * rowHeight}px`)
+          .style('height', `${rowHeight}px`)
+          .classed(`c-${column.id}`, true)
+          .classed('has-bottom-border', hasBottomBorder)
+          .classed('has-left-border', hasLeftBorder)
+          .classed('has-top-border', hasTopBorder)
+          .classed('has-right-border', hasRightBorder)
     }
 
     function compileBorderLayout () {
-      const rowToIndex = new Map(),
-        columnToIndex = new Map(),
-        selectedCellGrid = []
+      const rowToIndex = new Map()
+      const columnToIndex = new Map()
+      const selectedCellGrid = []
 
       return selectedCells
           .reduce(toCoords, [])
@@ -86,11 +88,13 @@ export function createHighlightSelectedCells () {
 
       function toCoords (acc, { row, column }) {
         let columnIndex = columnToIndex.has(column)
-                ? columnToIndex.get(column) : findIndex(columns, column),
-          rowIndex = rowToIndex.has(row)
-                ? rowToIndex.get(row) : findIndex(rows, row),
-          gridRow = selectedCellGrid[rowIndex] || [],
-          cell = { row, column, rowIndex, columnIndex }
+                ? columnToIndex.get(column) : findIndex(columns, column)
+
+        let rowIndex = rowToIndex.has(row)
+                ? rowToIndex.get(row) : findIndex(rows, row)
+
+        let gridRow = selectedCellGrid[rowIndex] || []
+        let cell = { row, column, rowIndex, columnIndex }
 
         gridRow[columnIndex] = cell
 
@@ -102,17 +106,20 @@ export function createHighlightSelectedCells () {
       }
 
       function toBorderCells (acc, cell) {
-        const { rowIndex, columnIndex } = cell,
-          hasLeftBorder = !selectedCellGrid[rowIndex][columnIndex - 1],
-          hasRightBorder = !selectedCellGrid[rowIndex][columnIndex + 1],
-          hasTopBorder = !selectedCellGrid[rowIndex - 1] ||
-                  !selectedCellGrid[rowIndex - 1][columnIndex],
-          hasBottomBorder = !selectedCellGrid[rowIndex + 1] ||
-                  !selectedCellGrid[rowIndex + 1][columnIndex],
-          borderCell = Object.assign(
-                cell
-              , { hasLeftBorder, hasRightBorder, hasTopBorder, hasBottomBorder }
-              )
+        const { rowIndex, columnIndex } = cell
+        const hasLeftBorder = !selectedCellGrid[rowIndex][columnIndex - 1]
+        const hasRightBorder = !selectedCellGrid[rowIndex][columnIndex + 1]
+
+        const hasTopBorder = !selectedCellGrid[rowIndex - 1] ||
+                  !selectedCellGrid[rowIndex - 1][columnIndex]
+
+        const hasBottomBorder = !selectedCellGrid[rowIndex + 1] ||
+                  !selectedCellGrid[rowIndex + 1][columnIndex]
+
+        const borderCell = Object.assign(
+          cell,
+          { hasLeftBorder, hasRightBorder, hasTopBorder, hasBottomBorder }
+        )
 
         if (hasAnyBorder(borderCell)) acc.push(borderCell)
         return acc

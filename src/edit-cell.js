@@ -9,23 +9,22 @@ import './edit-cell.css'
 const append = appendIfMissing('span.edit-cell-input')
 
 export function createEditCell () {
-  const rowToTemp = new WeakMap(),
-    dispatch = createDispatch('change', 'validationerror', 'editstart', 'editend'),
-    api = rebind().from(dispatch, 'on'),
-    internalDispatch = createDispatch('external-edit-request')
+  const rowToTemp = new WeakMap()
+  const dispatch = createDispatch('change', 'validationerror', 'editstart', 'editend')
+  const api = rebind().from(dispatch, 'on')
+  const internalDispatch = createDispatch('external-edit-request')
 
-  let gesture = 'dblclick',
-    component,
-    validate = () => null,
-    editable = () => true
+  let gesture = 'dblclick'
+  let component
+  let validate = () => null
+  let editable = () => true
 
   function editCellEach (d, i) {
-    const isEditable = editable.call(this, d, i),
-      row = unwrap(d.row),
-      column = d.column,
-      temp = rowToTemp.get(row),
-      cellTarget = select(this),
-      rowNumber = d.row.freeRowNumber
+    const isEditable = editable.call(this, d, i)
+    const row = unwrap(d.row)
+    const column = d.column
+    const temp = rowToTemp.get(row)
+    const cellTarget = select(this)
 
     cellTarget.classed('editable-cell', isEditable)
         .on('click.quiet', isEditable ? () => event.stopPropagation() : null)
@@ -35,9 +34,8 @@ export function createEditCell () {
     draw()
 
     function startExternalEdit (cell, initValue) {
-      const eventColumn = cell.column,
-        eventRow = cell.row,
-        isTargetRowEditable = editable.call(this, cell)
+      const eventColumn = cell.column
+      const isTargetRowEditable = editable.call(this, cell)
 
       if (eventColumn.id !== column.id) return
       if (!isTargetRowEditable) return
@@ -80,9 +78,9 @@ export function createEditCell () {
     }
 
     function validateChange (d) {
-      const unwrappedRow = unwrap(d.row),
-        reason = validate.call(this, d, this.value),
-        isValid = !reason
+      const unwrappedRow = unwrap(d.row)
+      const reason = validate.call(this, d, this.value)
+      const isValid = !reason
 
       if (isValid) {
         removeTmp(d)
@@ -96,18 +94,18 @@ export function createEditCell () {
     }
 
     function startEdit (cell, initValue) {
-      const { row, value } = cell,
-        unwrappedRow = unwrap(row),
-        isAlreadyEditing = (rowToTemp.get(unwrappedRow) !== undefined)
+      const { row } = cell
+      const unwrappedRow = unwrap(row)
+      const isAlreadyEditing = (rowToTemp.get(unwrappedRow) !== undefined)
 
       if (isAlreadyEditing) return
 
       rowToTemp.set(
-        unwrappedRow
-      , {
-        value: isUndefined(initValue) ? cell.value : initValue,
-        valid: true
-      }
+        unwrappedRow,
+        {
+          value: isUndefined(initValue) ? cell.value : initValue,
+          valid: true
+        }
       )
 
       dispatch.call('editstart', this, unwrappedRow)
@@ -116,8 +114,8 @@ export function createEditCell () {
 
     // Reconfigure row changed key function after first run
     editCellEach.rowChangedKey = function (targetRow) {
-      const temp = rowToTemp.get(unwrap(targetRow)),
-        isEditing = !!temp
+      const temp = rowToTemp.get(unwrap(targetRow))
+      const isEditing = !!temp
 
       return !isEditing ? '-'
             : temp.valid ? '★'

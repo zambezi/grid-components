@@ -14,8 +14,8 @@ export function createRunHeaderComponents () {
   return api(runHeaderComponents)
 
   function runComponents (d, i) {
-    const components = d.headerComponents,
-      target = select(this)
+    const components = d.headerComponents
+    const target = select(this)
 
     if (!components) return
     components.forEach(component => target.each(component))

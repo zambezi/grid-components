@@ -1,47 +1,46 @@
 import { createCellDragBehaviour } from './cell-drag-behaviour'
 import { dispatch as createDispatch } from 'd3-dispatch'
-import { modulo } from '@zambezi/fun'
+import { modulo, someResult as some } from '@zambezi/fun'
 import { rebind, keyCodeHandler, appendIfMissing } from '@zambezi/d3-utils'
 import { reduce, indexBy, find, findIndex, debounce, uniqueId } from 'underscore'
 import { select, event } from 'd3-selection'
-import { someResult as some } from '@zambezi/fun'
 import { unwrap } from '@zambezi/grid'
 
 import './cell-selection.css'
 
 export function createCellSelection () {
   const dispatch = createDispatch(
-          'cell-selected-change'
-        , 'cell-selected-update'
-        , 'cell-active-action'
-        , 'cell-active-change'
-        , 'cell-active-update'
-        , 'cell-active-paste'
-        ),
-    clipboardKeydown = uniqueId('keydown.clipboard.'),
-    clipboardKeyup = uniqueId('keyup.clipboard.'),
-    cellDragBehaviour = createCellDragBehaviour(),
-    api = rebind()
+          'cell-selected-change',
+          'cell-selected-update',
+          'cell-active-action',
+          'cell-active-change',
+          'cell-active-update',
+          'cell-active-paste'
+        )
+  const clipboardKeydown = uniqueId('keydown.clipboard.')
+  const clipboardKeyup = uniqueId('keyup.clipboard.')
+  const cellDragBehaviour = createCellDragBehaviour()
+  const api = rebind()
             .from(dispatch, 'on')
             .from(cellDragBehaviour, 'ignoreSelector')
-            .from(cellDragBehaviour, 'debugIgnoreSelector'),
-    defaultSelectionKey = d => d,
-    clipboardProxy = appendIfMissing('textarea.zambezi-grid-clipboard-proxy')
+            .from(cellDragBehaviour, 'debugIgnoreSelector')
+  const defaultSelectionKey = d => d
+  const clipboardProxy = appendIfMissing('textarea.zambezi-grid-clipboard-proxy')
 
-  let selected = [],
-    selectedCandidates,
-    activeCandidate,
-    selectedRowsByColumnId = {},
-    acceptPasteFrom = [],
-    active,
-    selectable = true,
-    trackPaste = true,
-    typeToActivate = true,
-    lastOverCell,
-    rowSelectionKey = defaultSelectionKey,
-    rowUpdateNeeded = true,
-    clip,
-    isIEPasting
+  let selected = []
+  let selectedCandidates
+  let activeCandidate
+  let selectedRowsByColumnId = {}
+  let acceptPasteFrom = []
+  let active
+  let selectable = true
+  let trackPaste = true
+  let typeToActivate = true
+  let lastOverCell
+  let rowSelectionKey = defaultSelectionKey
+  let rowUpdateNeeded = true
+  let clip
+  let isIEPasting
 
   function cellSelection (s) {
     s.each(cellSelectionEach)
@@ -86,8 +85,8 @@ export function createCellSelection () {
   }
 
   cellSelection.rowChangedKey = function (targetRow) {
-    const unwrappedRow = unwrap(targetRow),
-      selectedColumnIds = []
+    const unwrappedRow = unwrap(targetRow)
+    const selectedColumnIds = []
 
     let key = ''
 
@@ -116,9 +115,9 @@ export function createCellSelection () {
 
   function cellSelectionEach (bundle) {
     const target = select(this)
-            .on('data-dirty.cell-selection', () => rowUpdateNeeded = true),
-      { columns, rows } = bundle,
-      columnById = indexBy(columns, 'id')
+            .on('data-dirty.cell-selection', () => (rowUpdateNeeded = true))
+    const { columns, rows } = bundle
+    const columnById = indexBy(columns, 'id')
 
     setupDragEvents()
     setupPasteEvents()
@@ -134,9 +133,9 @@ export function createCellSelection () {
     function moveHorizontal (step) {
       if (!active) return
 
-      const { column, row } = active,
-        currentColumnIndex = columns.indexOf(column),
-        newColumn = columns[modulo(currentColumnIndex + step, columns.length)]
+      const { column, row } = active
+      const currentColumnIndex = columns.indexOf(column)
+      const newColumn = columns[modulo(currentColumnIndex + step, columns.length)]
 
       setActive({ row, column: newColumn })
       target.dispatch('redraw', { bubbles: true })
@@ -145,9 +144,9 @@ export function createCellSelection () {
     function moveVertical (step, rows) {
       if (!active) return
 
-      const { column, row } = active,
-        currentRowIndex = findIndex(rows, r => rowSelectionKey(unwrap(r)) === rowSelectionKey(row)),
-        newRow = rows[modulo(currentRowIndex + step, rows.length)]
+      const { column, row } = active
+      const currentRowIndex = findIndex(rows, r => rowSelectionKey(unwrap(r)) === rowSelectionKey(row))
+      const newRow = rows[modulo(currentRowIndex + step, rows.length)]
 
       setActive({ row: newRow, column })
       target.dispatch('redraw', { bubbles: true })
@@ -204,8 +203,8 @@ export function createCellSelection () {
         return acc
       }
 
-      const columnId = selection.column.id,
-        set = acc[columnId] || new Set()
+      const columnId = selection.column.id
+      const set = acc[columnId] || new Set()
 
       set.add(selection.row)
       acc[columnId] = set
@@ -213,8 +212,8 @@ export function createCellSelection () {
     }
 
     function candidateToSelection ({ row, column }) {
-      const columnFound = typeof column === 'string' ? columnById[column] : column,
-        rowFound = typeof row === 'number' ? bundle[row] : row
+      const columnFound = typeof column === 'string' ? columnById[column] : column
+      const rowFound = typeof row === 'number' ? bundle[row] : row
 
       if (!columnFound || !rowFound) return undefined
       return { row: rowFound, column: columnFound }
@@ -258,7 +257,7 @@ export function createCellSelection () {
             .on('dragend.redraw', () => target.dispatch('redraw', { bubbles: true }))
 
             .on('dragover.select', d => mouseSelection(d, true))
-            .on('dragover.cache', d => lastOverCell = d)
+            .on('dragover.cache', d => (lastOverCell = d))
             .on('dragover.redraw', () => target.dispatch('redraw', { bubbles: true }))
       )
     }
@@ -270,9 +269,9 @@ export function createCellSelection () {
     }
 
     function onClipMaybe () {
-      const targetNode = target.node(),
-        allAcceptedNodes = (acceptPasteFrom || []).concat(targetNode),
-        { ctrlKey } = event
+      const targetNode = target.node()
+      const allAcceptedNodes = (acceptPasteFrom || []).concat(targetNode)
+      const { ctrlKey } = event
 
       if (!allAcceptedNodes.some(n => n.contains(document.activeElement))) return
       if (!ctrlKey) return
@@ -298,10 +297,10 @@ export function createCellSelection () {
     }
 
     function onClipAfter () {
-      const targetNode = target.node(),
-        { key } = event
+      const targetNode = target.node()
+      const { key } = event
 
-      if (!key == 'Control') return
+      if (key !== 'Control') return
 
       if (isIEPasting) {
         dispatch.call('cell-active-paste', targetNode, active, clip.property('value'))
@@ -332,14 +331,14 @@ export function createCellSelection () {
     }
 
     function mouseSelection (d, forceAppend) {
-      const column = d.column,
-        columnId = column.id,
-        set = selectedRowsByColumnId[columnId],
-        row = unwrap(d.row),
-        { shiftKey, ctrlKey } = event.sourceEvent ? event.sourceEvent : event,
-        cell = { row, column },
-        isAlreadySelected = set && set.has(row),
-        hasActive = !!active
+      const column = d.column
+      const columnId = column.id
+      const set = selectedRowsByColumnId[columnId]
+      const row = unwrap(d.row)
+      const { shiftKey, ctrlKey } = event.sourceEvent ? event.sourceEvent : event
+      const cell = { row, column }
+      const isAlreadySelected = set && set.has(row)
+      const hasActive = !!active
 
       if (selectable) {
         switch (true) {
@@ -347,7 +346,7 @@ export function createCellSelection () {
             addRangeToSelection(active, cell)
             break
 
-          case forceAppend || shiftKey && hasActive:
+          case (forceAppend || shiftKey) && hasActive:
             setSelectionToRange(active, cell)
             break
 
@@ -390,14 +389,14 @@ export function createCellSelection () {
 
     function rangeFrom (a, b) {
       const columnRange = rangeFromUnorderedIndices(
-              columns
-            , columns.indexOf(a.column)
-            , columns.indexOf(b.column)
-            ),
-        rowRange = rangeFromUnorderedIndices(
-              bundle.rows
-            , findIndex(bundle.rows, r => unwrap(r) == a.row)
-            , findIndex(bundle.rows, r => unwrap(r) == b.row)
+              columns,
+              columns.indexOf(a.column),
+              columns.indexOf(b.column)
+            )
+      const rowRange = rangeFromUnorderedIndices(
+              bundle.rows,
+              findIndex(bundle.rows, r => unwrap(r) === a.row),
+              findIndex(bundle.rows, r => unwrap(r) === b.row)
             ).map(unwrap)
 
       return rowRange.reduce(allCellsInColumns, [])
@@ -420,15 +419,15 @@ export function createCellSelection () {
     }
 
     function removeFromSelected ({ row, column }) {
-      const columnId = column.id,
-        set = selectedRowsByColumnId[columnId]
+      const columnId = column.id
+      const set = selectedRowsByColumnId[columnId]
 
       if (set) set.delete(row)
     }
 
     function addToSelected ({ row, column }) {
-      const columnId = column.id,
-        set = selectedRowsByColumnId[columnId] || new Set()
+      const columnId = column.id
+      const set = selectedRowsByColumnId[columnId] || new Set()
 
       set.add(row)
       selectedRowsByColumnId[columnId] = set
@@ -462,5 +461,5 @@ function isASpecialKey (key) {
 }
 
 function areSameCell (a, b) {
-  return a && b && unwrap(a.row) == unwrap(b.row) && a.column == b.column
+  return a && b && unwrap(a.row) === unwrap(b.row) && a.column === b.column
 }

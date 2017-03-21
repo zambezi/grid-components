@@ -5,23 +5,21 @@ import { unwrap } from '@zambezi/grid'
 
 import './gather-rows.css'
 
-const rowLabelClass = 'zambezi-gather-group-label',
-  rowLabel = appendIfMissing(`span.${rowLabelClass}`),
-  rowIcon = appendIfMissing('i.zambezi-group-toggle'),
-  rowTitle = appendIfMissing('span.zambezi-group-title')
+const rowLabelClass = 'zambezi-gather-group-label'
+const rowLabel = appendIfMissing(`span.${rowLabelClass}`)
+const rowIcon = appendIfMissing('i.zambezi-group-toggle')
+const rowTitle = appendIfMissing('span.zambezi-group-title')
 
 export function createGatherRows () {
-  let groups = [],
-    cache,
-    expandedRowByLabel = {},
-    expandedByDefault = false,
-    defaultExpanded = true,
-    defaultPredicate = () => true,
-    renderLabel = true
+  let groups = []
+  let cache
+  let defaultExpanded = true
+  let defaultPredicate = () => true
+  let renderLabel = true
 
   function gatherRows (s) {
     s.each(gatherRowsEach)
-        .on('data-dirty.gather-rows', () => cache = null)
+        .on('data-dirty.gather-rows', () => (cache = null))
   }
 
   gatherRows.defaultExpanded = function (value) {
@@ -68,13 +66,9 @@ export function createGatherRows () {
   }
 
   function onRowUpdate ({ row }) {
-    const { label, isGroupRow, children, expanded } = row,
-      target = select(this),
-      classed = target.classed('is-gather-group-row')
-
-    let labelTarget,
-      titleTarget,
-      iconTarget
+    const { label, isGroupRow, children, expanded } = row
+    const target = select(this)
+    let labelTarget
 
     target.classed('is-gather-group-row', isGroupRow)
         .classed('has-children', isGroupRow && children && children.length)
@@ -85,8 +79,8 @@ export function createGatherRows () {
       target.select(`.${rowLabelClass}`).remove()
     } else {
       labelTarget = target.select(rowLabel)
-      iconTarget = labelTarget.select(rowIcon)
-      titleTarget = labelTarget.select(rowTitle).text(label)
+      labelTarget.select(rowIcon)
+      labelTarget.select(rowTitle).text(label)
     }
 
     target.on('click.gather-rows', isGroupRow ? onRowClick : null)

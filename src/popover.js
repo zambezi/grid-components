@@ -9,18 +9,18 @@ export function createPopover () {
   let lastCreated
 
   function popover (d, i) {
-    const clickCloseEventName = uniqueId('click.cell-popover-close-'),
-      body = select(document.body),
-      anchor = this,
+    const clickCloseEventName = uniqueId('click.cell-popover-close-')
+    const body = select(document.body)
+    const anchor = this
 
-      popover = body.select(appendIfMissing('div.zambezi-grid-popover'))
-              .html(''),
+    const popover = body.select(appendIfMissing('div.zambezi-grid-popover'))
+              .html('')
 
-      popoverContent = popover.append('div')
+    const popoverContent = popover.append('div')
               .on('popover-close.cleanup', removeClickOutsideHandler)
-              .on('popover-close.close', close),
+              .on('popover-close.close', close)
 
-      gridRoot = select(this)
+    const gridRoot = select(this)
             .selectAll(upwards('.zambezi-grid'))
               .on('grid-scroll.cell-popover', close)
 
@@ -35,15 +35,15 @@ export function createPopover () {
     }
 
     function smartPosition (d) {
-      const target = select(this),
-        anchorRect = anchor.getBoundingClientRect(),
-        popupRect = this.getBoundingClientRect(),
-        bodyRect = document.body.getBoundingClientRect(),
+      const target = select(this)
+      const anchorRect = anchor.getBoundingClientRect()
+      const popupRect = this.getBoundingClientRect()
+      const bodyRect = document.body.getBoundingClientRect()
 
-        fitsRight = (anchorRect.left + anchorRect.width + popupRect.width) <= bodyRect.width,
-        fitsBottom = (anchorRect.top + popupRect.height) <= bodyRect.height,
-        left = fitsRight ? anchorRect.left + anchorRect.width : anchorRect.left - popupRect.width,
-        top = fitsBottom ? anchorRect.top : (anchorRect.top + anchorRect.height) - popupRect.height
+      const fitsRight = (anchorRect.left + anchorRect.width + popupRect.width) <= bodyRect.width
+      const fitsBottom = (anchorRect.top + popupRect.height) <= bodyRect.height
+      const left = fitsRight ? anchorRect.left + anchorRect.width : anchorRect.left - popupRect.width
+      const top = fitsBottom ? anchorRect.top : (anchorRect.top + anchorRect.height) - popupRect.height
 
       target
           .style('left', `${Math.max(left, 0)}px`)

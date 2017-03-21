@@ -7,16 +7,16 @@ import { someResult as some, batch } from '@zambezi/fun'
 const appendInput = appendIfMissing('input.edit-value')
 
 export function createEditCellValue () {
-  const editValue = createEditValue(),
-    editCell = createEditCell().component(editValue)
+  const editValue = createEditValue()
+  const editCell = createEditCell().component(editValue)
 
   return rebind().from(editValue, 'characterClass')(editCell)
 }
 
 function createEditValue () {
-  const dispatch = createDispatch('partialedit', 'commit', 'cancel'),
-    characterClassValidator = createCharacterClassValidator(),
-    api = rebind()
+  const dispatch = createDispatch('partialedit', 'commit', 'cancel')
+  const characterClassValidator = createCharacterClassValidator()
+  const api = rebind()
                 .from(dispatch, 'on')
                 .from(characterClassValidator, 'characterClass')
 
@@ -35,11 +35,11 @@ function createEditValue () {
   return api(editValue)
 
   function editValueEach (d, i) {
-    let isCancelled,
-      isCommited
+    let isCancelled
+    let isCommited
 
-    const value = d.tempInput || d.value || '',
-      input = select(this)
+    const value = d.tempInput || d.value || ''
+    const input = select(this)
             .select(appendInput)
               .classed('error', !d.isValidInput)
               .property('value', value)

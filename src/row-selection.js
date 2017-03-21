@@ -1,5 +1,5 @@
-import { rebind, selectionChanged } from '@zambezi/d3-utils'
-import { select, event } from 'd3-selection'
+import { selectionChanged } from '@zambezi/d3-utils'
+import { select } from 'd3-selection'
 import { unwrap } from '@zambezi/grid'
 
 import './row-selection.css'

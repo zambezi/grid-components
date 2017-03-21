@@ -2,10 +2,10 @@ import { select } from 'd3-selection'
 import './crosshairs.css'
 
 export function createCrosshairs () {
-  let vertical = true,
-    horizontal = true,
-    highlightedRow,
-    highlightedColum
+  let vertical = true
+  let horizontal = true
+  let highlightedRow
+  let highlightedColum
 
   function crosshairs (s) {
     s.each(crosshairsEach)
