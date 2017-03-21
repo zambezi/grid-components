@@ -6,27 +6,27 @@ import { someResult as some, batch } from '@zambezi/fun'
 
 const appendInput = appendIfMissing('input.edit-value')
 
-export function createEditCellValue() {
+export function createEditCellValue () {
   const editValue = createEditValue()
-      , editCell = createEditCell().component(editValue)
+  const editCell = createEditCell().component(editValue)
 
   return rebind().from(editValue, 'characterClass')(editCell)
 }
 
-function createEditValue() {
+function createEditValue () {
   const dispatch = createDispatch('partialedit', 'commit', 'cancel')
-      , characterClassValidator = createCharacterClassValidator()
-      , api = rebind()
+  const characterClassValidator = createCharacterClassValidator()
+  const api = rebind()
                 .from(dispatch, 'on')
                 .from(characterClassValidator, 'characterClass')
 
   let keyDownHandlers = []
 
-  function editValue(s) {
+  function editValue (s) {
     s.each(editValueEach)
   }
 
-  editValue.keyDownHandlers = function(value) {
+  editValue.keyDownHandlers = function (value) {
     if (!arguments.length) return keyDownHandlers
     keyDownHandlers = value
     return editValue
@@ -34,15 +34,15 @@ function createEditValue() {
 
   return api(editValue)
 
-  function editValueEach(d, i) {
+  function editValueEach (d, i) {
     let isCancelled
-      , isCommited
+    let isCommited
 
     const value = d.tempInput || d.value || ''
-        , input = select(this)
+    const input = select(this)
             .select(appendInput)
               .classed('error', !d.isValidInput)
-              .property('value' , value)
+              .property('value', value)
               .each(setCursorAtEnd)
               .on('input', () => dispatch.call('partialedit', input.node(), d))
               .on('keypress.valid-character', characterClassValidator)
@@ -51,15 +51,15 @@ function createEditValue() {
               , some.apply(
                     null
                   , keyDownHandlers.concat(
-                      [
-                        keyCodeHandler(onCancel, 9)  // tab
-                      , keyCodeHandler(batch(stopPropagation, onCancel), 27) // esc
-                      , keyCodeHandler(batch(stopPropagation, onCommit), 13)  // enter
-                      , keyCodeHandler(stopPropagation, 38) // up
-                      , keyCodeHandler(stopPropagation, 40) // down
-                      , keyCodeHandler(stopPropagation, 37) // left
-                      , keyCodeHandler(stopPropagation, 39) // right
-                      ]
+                    [
+                      keyCodeHandler(onCancel, 9),  // tab
+                      keyCodeHandler(batch(stopPropagation, onCancel), 27), // esc
+                      keyCodeHandler(batch(stopPropagation, onCommit), 13),  // enter
+                      keyCodeHandler(stopPropagation, 38), // up
+                      keyCodeHandler(stopPropagation, 40), // down
+                      keyCodeHandler(stopPropagation, 37), // left
+                      keyCodeHandler(stopPropagation, 39) // right
+                    ]
                     )
                 )
               )
@@ -67,22 +67,22 @@ function createEditValue() {
 
     if (d.isValidInput) input.node().focus()
 
-    function stopPropagation() {
+    function stopPropagation () {
       event.stopPropagation()
     }
 
-    function setCursorAtEnd(d, i) {
+    function setCursorAtEnd (d, i) {
       this.setSelectionRange(value.length, value.length)
     }
 
-    function onCommit(d) {
+    function onCommit (d) {
       if (isCancelled) return
       if (isCommited) return
       isCommited = true
       dispatch.call('commit', input.node(), d)
     }
 
-    function onCancel(d) {
+    function onCancel (d) {
       isCancelled = true
       dispatch.call('cancel', input.node(), d)
     }
