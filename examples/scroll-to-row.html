@@ -1,0 +1,61 @@
+<!doctype html>
+<head><meta charset="utf-8" /></head>
+<body>
+
+<div class="grid-target"></div>
+<button id="scroll-to-emiliano">scroll Dr. Emiliano Hickle into view</button>
+
+<link rel="stylesheet" type="text/css" href="../node_modules/normalize.css/normalize.css">
+<script src="../node_modules/underscore/underscore.js"></script>
+<script src="../node_modules/d3/build/d3.js"></script>
+<script src="../node_modules/@zambezi/d3-utils/dist/d3-utils.js"></script>
+<script src="../node_modules/@zambezi/fun/dist/fun.js"></script>
+<script src="../node_modules/faker/faker.js"></script>
+<script src="../node_modules/@zambezi/grid/dist/grid.js"></script>
+<script src="../node_modules/seedrandom/seedrandom.js"></script>
+<script src="../dist/grid-components.js"></script>
+<script>
+
+  Math.seedrandom(42)
+
+  const rows = _.range(1, 200).map(faker.Helpers.createCard).map(addId)
+  const scrollToRow = gridComponents.createScrollToRow()
+  const table = grid.createGrid()
+            .columns(
+              [
+                { key: 'id' }
+              , { key: 'name', width: 200 }
+              , { key: 'username' }
+              , { key: 'email' }
+              , {
+                  label: 'synth column'
+                , format: r => `${r.name} ${r.email}`.split('').sort().reverse().join('').toUpperCase()
+                , sort: (a, b) => d3.ascending(a.name, b.name)
+                }
+              , { key: 'phone' }
+              ]
+            )
+            .use(scrollToRow)
+            .on('draw.log', d => console.log('draw'))
+
+  const target = d3.select('.grid-target').datum(rows).style('height', '600px')
+
+  target.call(table)
+
+  d3.select('#scroll-to-emiliano')
+        .on('click.clear', () => console.clear())
+        .on('click.log', () => console.log('scroll!'))
+        .on('click.scroll', () => scrollToRow.item(rows[187]))
+        .on('click.redraw', draw)
+
+  function draw() {
+    target.call(table)
+  }
+
+  function addId (r, i) {
+    r.id = i
+    return r
+  }
+
+</script>
+</body>
