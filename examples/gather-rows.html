@@ -79,7 +79,7 @@
       target.select(d3Utils.appendIfMissing('button'))
           .on(
             'click.debug', 
-            d => console.log('%c grouped rows component', 'background: #222; color: #bada55')
+            d => console.log('grouped rows component', d)
           )
           .text(_.uniqueId('ran_'))
     }
