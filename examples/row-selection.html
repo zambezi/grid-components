@@ -3,8 +3,8 @@
 <body>
 
 <div class="grid-target"></div>
+<button id="set-active-random-row">set active to random row</button>
 <pre id="output"></pre>
-
 <link rel="stylesheet" type="text/css" href="../node_modules/normalize.css/normalize.css">
 <script src="../node_modules/underscore/underscore.js"></script>
 <script src="../node_modules/d3/build/d3.js"></script>
@@ -15,8 +15,16 @@
 <script src="../dist/grid-components.js"></script>
 <script>
 
-  const rows = _.range(1, 200).map(faker.Helpers.createCard)
+  const rows = _.range(1, 100).map(faker.Helpers.createCard)
+
       , rowSelection = gridComponents.createRowSelection()
+            .on('row-active-change.log', r => console.log('row active change', r))
+
+      , out = d3.select('#output')
+      , setActiveRandomRow = d3.select('#set-active-random-row')
+            .on('click.configure', () => rowSelection.active(_.sample(rows)))
+            .on('click.redraw', draw)
+
       , table = grid.createGrid()
             .columns(
               [
@@ -32,8 +40,17 @@
               ]
             )
             .usePre(rowSelection)
+            .on('draw.log', () => out.text('active row:\n' +  JSON.stringify(rowSelection.active(), null, 2)))
 
-  d3.select('.grid-target').datum(rows).style('height', '600px').call(table)
+      , target = d3.select('.grid-target')
+            .datum(rows)
+            .style('height', '600px')
+
+  draw()
+
+  function draw() {
+    target.call(table)
+  }
 
 </script>
 </body>

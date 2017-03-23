@@ -10,13 +10,14 @@ import './cell-selection.css'
 
 export function createCellSelection () {
   const dispatch = createDispatch(
-          'cell-selected-change',
-          'cell-selected-update',
-          'cell-active-action',
-          'cell-active-change',
-          'cell-active-update',
-          'cell-active-paste'
-        )
+    'cell-selected-change',
+    'cell-selected-update',
+    'cell-active-action',
+    'cell-active-change',
+    'cell-active-update',
+    'cell-active-paste'
+  )
+
   const clipboardKeydown = uniqueId('keydown.clipboard.')
   const clipboardKeyup = uniqueId('keyup.clipboard.')
   const cellDragBehaviour = createCellDragBehaviour()

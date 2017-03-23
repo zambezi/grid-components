@@ -1,11 +1,15 @@
-import { selectionChanged } from '@zambezi/d3-utils'
+import { dispatch as createDispatch } from 'd3-dispatch'
 import { select } from 'd3-selection'
+import { selectionChanged, rebind } from '@zambezi/d3-utils'
 import { unwrap } from '@zambezi/grid'
 
 import './row-selection.css'
 
 export function createRowSelection () {
   const activeChanged = selectionChanged()
+  const dispatch = createDispatch('row-active-change')
+  const api = rebind().from(dispatch, 'on')
+
   let active
 
   function rowSelection (s) {
@@ -18,7 +22,7 @@ export function createRowSelection () {
     return rowSelection
   }
 
-  return rowSelection
+  return api(rowSelection)
 
   function rowSelectionEach ({ dispatcher }) {
     dispatcher
@@ -41,7 +45,10 @@ export function createRowSelection () {
   }
 
   function setActive ({ row }) {
-    active = unwrap(row)
+    const newActive = unwrap(row)
+    if (active === newActive) return
+    active = newActive
+    dispatch.call('row-active-change', this, newActive)
     select(this).dispatch('redraw', { bubbles: true })
   }
 }
