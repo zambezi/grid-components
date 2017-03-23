@@ -16,3 +16,13 @@ const rowSelection = gridComponents.createRowSelection()
           )
           .usePre(rowSelection)
 ```
+
+You can list to the `active-row-change` event to get the row as it is selected.
+
+```
+const rowSelection = gridComponents.createRowSelection()
+    .on('row-active-change.log', r => console.log('row active change', r))
+```
+
+The active row is also available through the `active` getter/setter on the component.
+You can also set the row and redraw the grid to see the active row change reflected.
