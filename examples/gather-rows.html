@@ -41,7 +41,10 @@
                 { key: 'name', width: 200 }
               , { key: 'username' }
               , { key: 'email' }
-              , { key: 'phone' }
+              , { 
+                  key: 'phone'
+                , components: [ callMeAll, grid.updateTextIfChanged ]
+                }
               , {
                   label: 'Price'
                 , format: gridComponents.nestedRowFormat(
@@ -66,6 +69,20 @@
   function addPrice(r) {
     r.price = Math.round(price() / 10) * 10
     return r
+  }
+
+  function callMeAll(d) {
+    const target = d3.select(this)
+    if (!d.row.isGroupRow) {
+      target.select('button').remove()
+    } else {
+      target.select(d3Utils.appendIfMissing('button'))
+          .on(
+            'click.debug', 
+            d => console.log('%c grouped rows component', 'background: #222; color: #bada55')
+          )
+          .text(_.uniqueId('ran_'))
+    }
   }
 
 </script>
