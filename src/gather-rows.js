@@ -79,13 +79,13 @@ export function createGatherRows () {
       target.select(`.${rowLabelClass}`).remove()
     } else {
       labelTarget = target.select(rowLabel)
+          .on('click.gather-rows', toggleRowExpansion)
+
       labelTarget.select(rowIcon)
       labelTarget.select(rowTitle).text(label)
     }
 
-    target.on('click.gather-rows', isGroupRow ? onRowClick : null)
-
-    function onRowClick ({ row }) {
+    function toggleRowExpansion ({ row }) {
       const unwrapped = unwrap(row)
       unwrapped.expanded = !unwrapped.expanded
       event.stopImmediatePropagation()
