@@ -117,7 +117,7 @@ export function createCellSelection () {
   function cellSelectionEach (bundle) {
     const target = select(this)
             .on('data-dirty.cell-selection', () => (rowUpdateNeeded = true))
-    const { columns, rows } = bundle
+    const { columns } = bundle
     const columnById = indexBy(columns, 'id')
     const newRowByOldRow = new Map()
 
@@ -169,13 +169,12 @@ export function createCellSelection () {
         if (newRow) acc.push({column, row: newRow})
         return acc
       }
-
     }
 
-    function findNewRowForOld(row) {
+    function findNewRowForOld (row) {
       const rowSeen = newRowByOldRow.has(row)
       let newRow = newRowByOldRow.get(row)
-      if (rowSeen && !newRow) return acc
+      if (rowSeen && !newRow) return null
       if (!newRow) {
         newRow = find(bundle, r => rowSelectionKey(r) === rowSelectionKey(row))
         newRowByOldRow.set(row, newRow)
