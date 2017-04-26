@@ -119,6 +119,7 @@ export function createCellSelection () {
             .on('data-dirty.cell-selection', () => (rowUpdateNeeded = true))
     const { columns, rows } = bundle
     const columnById = indexBy(columns, 'id')
+    const newRowByOldRow = new Map()
 
     setupDragEvents()
     setupPasteEvents()
@@ -126,7 +127,7 @@ export function createCellSelection () {
 
     if (rowUpdateNeeded) updateRowsFromKeys()
     if (selectedCandidates) updateSelectedFromCandidates()
-    if (activeCandidate) updateAcitveFromCandidate()
+    if (activeCandidate) updateActiveFromCandidate()
 
     bundle.dispatcher
         .on('cell-update.cell-selection', onCellUpdate)
@@ -156,23 +157,30 @@ export function createCellSelection () {
     function updateRowsFromKeys () {
       rowUpdateNeeded = false
       if (rowSelectionKey === defaultSelectionKey) return
-      const newRowByOldRow = new Map()
+
       selectedCandidates = (selected || [])
           .reduce(updateRowFromSelectionKey, [])
           .concat(selectedCandidates || [])
 
-      function updateRowFromSelectionKey (acc, {column, row}) {
-        const rowSeen = newRowByOldRow.has(row)
-        let newRow = newRowByOldRow.get(row)
-        if (rowSeen && !newRow) return acc
-        if (!newRow) {
-          newRow = find(rows, r => rowSelectionKey(r) === rowSelectionKey(row))
-          newRowByOldRow.set(row, newRow)
-        }
+      if (active) activeCandidate = active
 
+      function updateRowFromSelectionKey (acc, {column, row}) {
+        const newRow = findNewRowForOld(row)
         if (newRow) acc.push({column, row: newRow})
         return acc
       }
+
+    }
+
+    function findNewRowForOld(row) {
+      const rowSeen = newRowByOldRow.has(row)
+      let newRow = newRowByOldRow.get(row)
+      if (rowSeen && !newRow) return acc
+      if (!newRow) {
+        newRow = find(bundle, r => rowSelectionKey(r) === rowSelectionKey(row))
+        newRowByOldRow.set(row, newRow)
+      }
+      return newRow
     }
 
     function setActiveIfNone () {
@@ -183,7 +191,7 @@ export function createCellSelection () {
       select(this).dispatch('redraw', { bubbles: true })
     }
 
-    function updateAcitveFromCandidate () {
+    function updateActiveFromCandidate () {
       active = candidateToSelection(activeCandidate)
       activeCandidate = null
       dispatch.call('cell-active-update', this, active)
@@ -214,7 +222,7 @@ export function createCellSelection () {
 
     function candidateToSelection ({ row, column }) {
       const columnFound = typeof column === 'string' ? columnById[column] : column
-      const rowFound = typeof row === 'number' ? bundle[row] : row
+      const rowFound = typeof row === 'number' ? bundle[row] : findNewRowForOld(row)
 
       if (!columnFound || !rowFound) return undefined
       return { row: rowFound, column: columnFound }
