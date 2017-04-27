@@ -1,6 +1,6 @@
 {
   "name": "@zambezi/grid-components",
-  "version": "0.12.0",
+  "version": "0.13.0-cell-propagation-fixes.1",
   "description": "Components for the Zambezi Grids",
   "keywords": [
     "d3",
