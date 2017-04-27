@@ -462,7 +462,7 @@ export function createCellSelection () {
     if (!active) return false
     return areSameCell(d, active)
   }
-  
+
   function areSameCell (a, b) {
     return a && b && rowSelectionKey(unwrap(a.row)) === rowSelectionKey(unwrap(b.row)) && a.column.id === b.column.id
   }
