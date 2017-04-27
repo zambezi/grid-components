@@ -462,12 +462,12 @@ export function createCellSelection () {
     if (!active) return false
     return areSameCell(d, active)
   }
+  
+  function areSameCell (a, b) {
+    return a && b && rowSelectionKey(unwrap(a.row)) === rowSelectionKey(unwrap(b.row)) && a.column.id === b.column.id
+  }
 }
 
 function isASpecialKey (key) {
   return key && key.length > 1
-}
-
-function areSameCell (a, b) {
-  return a && b && unwrap(a.row) === unwrap(b.row) && a.column === b.column
 }
