@@ -1,6 +1,6 @@
 {
   "name": "@zambezi/grid-components",
-  "version": "0.12.0-constrain-gather-rows-toggle-area.1",
+  "version": "0.12.0",
   "description": "Components for the Zambezi Grids",
   "keywords": [
     "d3",
