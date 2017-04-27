@@ -39,6 +39,7 @@
   <button id="programmatic-select-by-indices">programmtically select some cells (using row index and column id)</button>
   <button id="programmatic-select-active">set active to random</button>
   <button id="programmatic-select-active-by-indices">set active to row index and column id</button>
+  <button id="replace-data">replace data</button>
 </p>
 
 <pre id="output"></pre>
@@ -69,8 +70,8 @@
 <script src="../dist/grid-components.js"></script>
 <script>
 
-  const rows = _.range(1, 30).map(faker.Helpers.createCard)
-        highlightActiveCell = gridComponents.createHighlightActiveCell()
+  let rows = _.range(1, 30).map(faker.Helpers.createCard)
+  const highlightActiveCell = gridComponents.createHighlightActiveCell()
       , highlightSelectedCells = gridComponents.createHighlightSelectedCells()
       , cellSelection = gridComponents.createCellSelection()
             .on('cell-active-action.edit', (cell, initValue) => editUsername.startEdit(cell, initValue))
@@ -98,12 +99,12 @@
                   key: 'username'
                 , components: [ editUsername, grid.updateTextIfChanged ]
                 }
-              , { key: 'email' }
               , {
                   label: 'some synthetic column'
                 , format: summary
                 , sort: (a, b) => d3.ascending(a.name, b.name)
                 }
+              , { key: 'email' }
               , { key: 'phone' }
               , { label: 'changed', format: () => _.uniqueId() }
               , {
@@ -162,8 +163,18 @@
       .on('click.reset', () => cellSelection.active(bunchOfCells()[0]))
       .on('click.redraw', () => target.call(table))
 
+  d3.select('#replace-data')
+      .on('click.rebuild-rows', rebuildRows)
+      .on('click.redraw', () => target.call(table))
+
+
   function setupGridClick(d) {
     d3.select(this).select('input').on('click', console.log.bind(console, 'CLICK!'))
+  }
+
+  function rebuildRows() {
+    rows = rows.map(row => Object.assign(faker.Helpers.createCard(), { email: row.email, phone: row.phone }))
+    target.datum(rows)
   }
 
   function rowChangedKey(r) {

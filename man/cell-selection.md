@@ -36,6 +36,20 @@ The cell selection component supports alternatively specifying selected cells by
 cells.selected([ { row: 1, column: 'email' }, { row: 2, column: 'name' } ])
 ```
 
+### keeping selection on data refresh 
+
+By default the set of selected cells will be dependent of the identity of the underlying row objects.
+On some cases, though, the grid will be redrawn with rows that are _logically_ the same, but not the same object reference.
+
+For these cases you'll want to provide the component with a `rowSelectionKey` function that can be used to map the row object to a local identifier string that can be used to recognize the new row.
+
+For example, if you can recognize a row by the `phone` field of its rows, you could do:
+
+``` javascript
+const cellSelection = gridComponents.createCellSelection()
+      .rowSelectionKey(r => r.phone)
+      // .etc.
+```
 
 ### supported user interactions
 
