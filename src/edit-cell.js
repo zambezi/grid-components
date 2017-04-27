@@ -151,7 +151,7 @@ export function createEditCell () {
     gesture = value
     return editCellEach
   }
-  
+
   editCellEach.silenceStartEditClicks = function (value) {
     if (!arguments.length) return silenceStartEditClicks
     silenceStartEditClicks = value
