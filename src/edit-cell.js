@@ -18,6 +18,7 @@ export function createEditCell () {
   let component
   let validate = () => null
   let editable = () => true
+  let silenceStartEditClicks = true
 
   function editCellEach (d, i) {
     const isEditable = editable.call(this, d, i)
@@ -27,7 +28,7 @@ export function createEditCell () {
     const cellTarget = select(this)
 
     cellTarget.classed('editable-cell', isEditable)
-        .on('click.quiet', isEditable ? () => event.stopPropagation() : null)
+        .on('click.quiet', (isEditable && silenceStartEditClicks) ? () => event.stopPropagation() : null)
         .on(gesture + '.start', isEditable ? cell => startEdit(cell) : null)
 
     internalDispatch.on(`external-edit-request.${column.id}`, startExternalEdit)
@@ -148,6 +149,12 @@ export function createEditCell () {
   editCellEach.gesture = function (value) {
     if (!arguments.length) return gesture
     gesture = value
+    return editCellEach
+  }
+  
+  editCellEach.silenceStartEditClicks = function (value) {
+    if (!arguments.length) return silenceStartEditClicks
+    silenceStartEditClicks = value
     return editCellEach
   }
 
