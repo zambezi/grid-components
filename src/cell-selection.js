@@ -121,7 +121,9 @@ export function createCellSelection () {
     const columnById = indexBy(columns, 'id')
     const newRowByOldRow = new Map()
 
-    setupDragEvents()
+    if (selectable) setupDragEvents()
+    else setupManualActiveSelection()
+    
     setupPasteEvents()
     setupKeyboardNavEvents()
 
@@ -268,6 +270,19 @@ export function createCellSelection () {
             .on('dragover.cache', d => (lastOverCell = d))
             .on('dragover.redraw', () => target.dispatch('redraw', { bubbles: true }))
       )
+    }
+    
+    function setupManualActiveSelection () {
+      bundle.dispatcher.on('cell-update.manual-set-active', onCellUpdate)
+      
+      function onCellUpdate () {
+        select(this).on('click.manual-set-active', )
+      }
+      
+      function onCellClick ({ column, row }) {
+        setActive({ column, row: unwrap(row) })
+        select(this).dispatch('redraw', { bubbles: true })
+      }
     }
 
     function activateLastCell () {
