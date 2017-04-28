@@ -123,7 +123,7 @@ export function createCellSelection () {
 
     if (selectable) setupDragEvents()
     else setupManualActiveSelection()
-    
+
     setupPasteEvents()
     setupKeyboardNavEvents()
 
@@ -271,14 +271,14 @@ export function createCellSelection () {
             .on('dragover.redraw', () => target.dispatch('redraw', { bubbles: true }))
       )
     }
-    
+
     function setupManualActiveSelection () {
       bundle.dispatcher.on('cell-update.manual-set-active', onCellUpdate)
-      
+
       function onCellUpdate () {
-        select(this).on('click.manual-set-active', )
+        select(this).on('click.manual-set-active', onCellClick)
       }
-      
+
       function onCellClick ({ column, row }) {
         setActive({ column, row: unwrap(row) })
         select(this).dispatch('redraw', { bubbles: true })
