@@ -38,6 +38,13 @@ export function createCrosshairs () {
           .on('row-update.crosshairs-row', horizontal ? updateRowHighlight : null)
           .on('row-exit.crosshairs-row', horizontal ? clearRowListeners : null)
 
+    target.on('mouseout', removeCrosshairs)
+
+    function removeCrosshairs(){
+      onColumnHover({ column: null })
+      onRowHover({ row: null })
+    }
+
     function updateHeaders () {
       target.selectAll('.zambezi-grid-headers .zambezi-grid-header')
             .on('mouseover.crosshairs-column', vertical ? column => onColumnHover({ column }) : null)
