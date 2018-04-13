@@ -40,7 +40,7 @@ export function createCrosshairs () {
 
     target.on('mouseout', removeCrosshairs)
 
-    function removeCrosshairs(){
+    function removeCrosshairs () {
       onColumnHover({ column: null })
       onRowHover({ row: null })
     }
